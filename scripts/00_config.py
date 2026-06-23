@@ -21,6 +21,8 @@ FINAL_GEOJSON_DIR = FINAL_DATA_DIR / "geojson"
 FINAL_CSV_DIR = FINAL_DATA_DIR / "csv"
 FINAL_GPKG_DIR = FINAL_DATA_DIR / "gpkg"
 CENSUS_RAW_DIR = RAW_DIR / "census_tiger_2025"
+HUD_RAW_DIR = RAW_DIR / "hud_opportunity_zones"
+SCHOOL_DISTRICTS_RAW_DIR = RAW_DIR / "texas_school_districts"
 STUDY_AREA_PROCESSED_DIR = PROCESSED_DIR / "study_area"
 SUBMARKET_PROCESSED_DIR = PROCESSED_DIR / "submarkets"
 SUBMARKET_DEFINITION_CSV = SUBMARKET_PROCESSED_DIR / "dfw_submarket_definition.csv"
@@ -34,6 +36,10 @@ SUBMARKET_SUMMARY_CSV = FINAL_CSV_DIR / "submarket_summary.csv"
 DFW_SUBMARKETS_GPKG = FINAL_GPKG_DIR / "dfw_submarkets.gpkg"
 VALIDATION_REPORT_CSV = FINAL_CSV_DIR / "layer_validation_report.csv"
 VALIDATED_LAYERS_GPKG = FINAL_GPKG_DIR / "validated_real_estate_layers.gpkg"
+DFW_OPPORTUNITY_ZONES_GEOJSON = FINAL_GEOJSON_DIR / "dfw_opportunity_zones.geojson"
+DFW_SCHOOL_DISTRICTS_GEOJSON = FINAL_GEOJSON_DIR / "dfw_school_districts.geojson"
+REAL_ESTATE_LAYER_CATALOG_CSV = FINAL_CSV_DIR / "real_estate_layer_catalog.csv"
+REAL_ESTATE_LAYER_CATALOG_GPKG = FINAL_GPKG_DIR / "real_estate_layer_catalog.gpkg"
 
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 MAPS_DIR = OUTPUTS_DIR / "maps"
@@ -51,6 +57,8 @@ REQUIRED_DIRECTORIES = [
     RAW_DIR,
     PROCESSED_DIR,
     CENSUS_RAW_DIR,
+    HUD_RAW_DIR,
+    SCHOOL_DISTRICTS_RAW_DIR,
     STUDY_AREA_PROCESSED_DIR,
     SUBMARKET_PROCESSED_DIR,
     FINAL_GEOJSON_DIR,

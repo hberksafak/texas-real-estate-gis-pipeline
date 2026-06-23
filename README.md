@@ -78,7 +78,7 @@ Expected project deliverables include:
 
 ## Current Status
 
-Milestone 5 in progress: reusable GIS layer cleaning and validation workflow added.
+Milestone 6 in progress: platform-ready real estate layer catalog workflow added.
 
 ## Limitations
 

@@ -34,6 +34,16 @@ These polygons are not official commercial, brokerage, county, city, government,
 
 Create reusable real estate context layers, including parcels, roads, flood zones, school districts, opportunity zones, amenities, and other investment-relevant overlays.
 
+### Platform-Ready Real Estate Layer Catalog
+
+Real estate GIS workflows need a clean layer catalog so analysts can see which boundaries, submarkets, and context overlays are available, where each layer came from, how many features it contains, and which platform-ready files should be used for mapping or downstream analysis.
+
+The catalog packages existing Census-derived boundaries, ZCTA layers, analyst-defined submarkets, and controlled public context overlays into GeoJSON and GeoPackage outputs. All final platform layers are standardized to `EPSG:4326`, while area fields are calculated in `EPSG:32138` for DFW-appropriate projected measurements.
+
+School district boundaries are included only as neutral education context overlays. They are not ranking criteria, demographic targeting inputs, or fair-housing-risk scoring variables.
+
+HUD Opportunity Zones are included only as policy and incentive context for business review. They are not used as demographic targeting inputs.
+
 ## 5. Parcel and Candidate Screening
 
 Apply transparent screening rules to identify candidate parcels or sites. Planned rules may include parcel size, location, zoning or land-use context, access, flood exposure, and exclusion constraints.

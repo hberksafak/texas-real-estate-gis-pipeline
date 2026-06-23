@@ -82,3 +82,22 @@ Fields written to `data/final/csv/layer_validation_report.csv`.
 | `total_area_sq_km` | Total layer area in square kilometers, calculated in `EPSG:32138`. |
 | `status` | Validation status, such as `passed`, `warning`, or `failed`. |
 | `notes` | Human-readable validation notes and repair actions. |
+
+## Real Estate Layer Catalog
+
+Fields written to `data/final/csv/real_estate_layer_catalog.csv`.
+
+| Field | Description |
+|---|---|
+| `layer_name` | Logical layer name used in GeoJSON, GeoPackage, and catalog outputs. |
+| `category` | Layer category, such as `boundary`, `submarket`, `incentive_context`, or `education_context`. |
+| `source` | Human-readable source or derivation description. |
+| `source_type` | Source handling type, such as existing validated layer or manually placed public source file. |
+| `feature_count` | Number of features available in the layer. |
+| `geometry_types` | Semicolon-delimited geometry types present in the layer. |
+| `crs` | Final layer CRS, expected to be `EPSG:4326` for available platform layers. |
+| `total_area_sq_km` | Total area in square kilometers, calculated in `EPSG:32138`. |
+| `output_geojson` | Platform-ready GeoJSON path for the layer when available or expected. |
+| `gpkg_layer_name` | GeoPackage layer name when exported. |
+| `status` | Availability status, such as `available` or `missing`. |
+| `notes` | Source limitations, optional-layer fallback notes, and neutral-use warnings. |
