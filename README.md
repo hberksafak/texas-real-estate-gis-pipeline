@@ -78,7 +78,7 @@ Expected project deliverables include:
 
 ## Current Status
 
-Milestone 10 in progress: interactive web map demo added.
+Milestone 11 in progress: static portfolio map export package added.
 
 ## Limitations
 

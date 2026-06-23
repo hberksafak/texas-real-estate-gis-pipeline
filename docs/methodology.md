@@ -100,6 +100,14 @@ Candidate layers remain analyst-defined grid proxy polygons and are not official
 
 Use QGIS layouts and atlas tooling to generate static map packages for shortlisted submarkets and candidate sites.
 
+### Static Portfolio Map Exports
+
+Static map exports provide portfolio-ready visuals for website screenshots, case-study figures, PDF inserts, and optional QGIS refinement. They complement the interactive web map by giving reviewers fixed, curated views of the study area, candidate screening workflow, and top-ranked proxy sites.
+
+The static export workflow uses the platform-ready GeoJSON package and plots layers in `EPSG:32138` for consistent DFW map geometry. PNG and PDF outputs are written to `outputs/maps/` and a summary table documents the map name, files, layers used, purpose, status, and notes.
+
+Candidate geometries shown in these maps are analyst-defined grid proxy polygons and are not official parcels. School district context remains neutral context only. Opportunity Zones remain policy and incentive context only.
+
 ## 10. Interactive Web Map
 
 Create an interactive web map for portfolio presentation and stakeholder review after real outputs are available.

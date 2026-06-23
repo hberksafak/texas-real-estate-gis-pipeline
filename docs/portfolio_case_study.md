@@ -17,3 +17,17 @@ This case study will describe the business question, GIS workflow, data sources,
 - Interactive web map
 - Key findings
 - Limitations and next steps
+
+## Visual Deliverables
+
+Draft - to be updated after real outputs are produced.
+
+Planned and generated visual deliverables include:
+
+- DFW study area overview
+- Candidate screening map
+- Top 25 ranked candidate sites map
+- Interactive web map
+- Platform-ready GeoJSON package
+
+Candidate polygons shown in the visuals are analyst-defined grid proxies, not official parcels. Opportunity Zones are policy/incentive context only, and school district layers are neutral context overlays only.

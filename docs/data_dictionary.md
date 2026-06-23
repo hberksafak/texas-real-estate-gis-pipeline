@@ -174,3 +174,17 @@ Fields written to `outputs/tables/webmap_layer_summary.csv`.
 | `added_to_map` | Boolean flag indicating whether the layer was added to the map. |
 | `default_visible` | Boolean flag indicating whether the layer is visible when the map first opens. |
 | `notes` | Layer-specific display notes and context-use limitations. |
+
+## Static Map Export Summary
+
+Fields written to `outputs/tables/static_map_export_summary.csv`.
+
+| Field | Description |
+|---|---|
+| `map_name` | Static map export identifier. |
+| `png_path` | PNG output path. |
+| `pdf_path` | PDF output path. |
+| `layers_used` | Semicolon-delimited list of layers used in the map. |
+| `output_purpose` | Portfolio or case-study use for the map. |
+| `status` | Export status for the map. |
+| `notes` | Map-level limitations and source notes. |
