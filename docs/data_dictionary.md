@@ -161,3 +161,16 @@ Fields written to `data/final/csv/platform_export_summary.csv`.
 | `export_crs` | CRS used for platform GeoJSON exports, expected to be `EPSG:4326`. |
 | `export_package_status` | Overall package status, such as `complete` or `partial`. |
 | `export_note` | Package-level delivery notes and context-use limitations. |
+
+## Web Map Layer Summary
+
+Fields written to `outputs/tables/webmap_layer_summary.csv`.
+
+| Field | Description |
+|---|---|
+| `layer_name` | Layer identifier used by the web map script. |
+| `input_path` | Platform-ready GeoJSON input path used for the web map. |
+| `feature_count` | Number of features in the input layer. |
+| `added_to_map` | Boolean flag indicating whether the layer was added to the map. |
+| `default_visible` | Boolean flag indicating whether the layer is visible when the map first opens. |
+| `notes` | Layer-specific display notes and context-use limitations. |

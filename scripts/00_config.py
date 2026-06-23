@@ -63,6 +63,8 @@ MAPS_PDF_DIR = MAPS_DIR / "pdf"
 REPORT_DIR = OUTPUTS_DIR / "report"
 WEBMAP_DIR = OUTPUTS_DIR / "webmap"
 TABLES_DIR = OUTPUTS_DIR / "tables"
+INTERACTIVE_WEBMAP_HTML = WEBMAP_DIR / "texas_real_estate_sourcing_webmap.html"
+WEBMAP_LAYER_SUMMARY_CSV = TABLES_DIR / "webmap_layer_summary.csv"
 
 DOCS_DIR = PROJECT_ROOT / "docs"
 QGIS_DIR = PROJECT_ROOT / "qgis"

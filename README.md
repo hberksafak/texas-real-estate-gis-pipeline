@@ -78,7 +78,7 @@ Expected project deliverables include:
 
 ## Current Status
 
-Milestone 9 in progress: platform-ready GeoJSON export package added.
+Milestone 10 in progress: interactive web map demo added.
 
 ## Limitations
 

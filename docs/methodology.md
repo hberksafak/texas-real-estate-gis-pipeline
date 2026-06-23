@@ -103,3 +103,11 @@ Use QGIS layouts and atlas tooling to generate static map packages for shortlist
 ## 10. Interactive Web Map
 
 Create an interactive web map for portfolio presentation and stakeholder review after real outputs are available.
+
+### Interactive Web Map Demo
+
+The interactive demo visualizes the final platform-ready GeoJSON package in a Folium/Leaflet web map. Core boundaries, ZCTA-based submarkets, Opportunity Zones, school district context, qualified and disqualified proxy candidates, ranked candidates, and the top 25 candidates can be toggled through the map layer control.
+
+The map is a client-facing demonstration artifact: it lets a reviewer inspect the pipeline's geography, screening outputs, rankings, and context layers without opening desktop GIS software. Heavier candidate and context layers are available as optional overlays so the initial view stays readable.
+
+Candidate polygons remain analyst-defined grid proxies and are not official parcels. Scores are transparent proxy rankings for portfolio demonstration only. School district context is neutral context only. Opportunity Zones are policy and incentive context only.
