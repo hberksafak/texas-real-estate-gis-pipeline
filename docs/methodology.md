@@ -68,6 +68,20 @@ Maintain explicit audit fields for each disqualification rule so rejected parcel
 
 Score qualified candidates with configurable weighted criteria. Planned scoring categories include access, market context, constraint risk, amenity proximity, and strategic fit.
 
+### Weighted Candidate Scoring and Ranking
+
+The first candidate ranking model scores only qualified analyst-defined grid proxy candidates. It is a transparent proxy sourcing score for portfolio demonstration, not a legal parcel valuation, entitlement review, engineering assessment, or development feasibility determination.
+
+The v1 scoring model uses weighted 0-100 component scores: 25% size suitability, 20% grid completeness / shape reliability, 20% neutral submarket candidate-supply context, 15% Opportunity Zone incentive context, 10% school district context completeness, and 10% geometry reliability.
+
+Size suitability favors candidates in the 25-120 acre ideal proxy range, with tapering outside that range. Grid completeness rewards near-full grid cells over clipped cells. Submarket context uses a moderated, reproducible candidate-distribution proxy and does not imply market demand, pricing, rent growth, or investment performance.
+
+School district context is neutral context completeness only. The model does not use school quality, school ratings, demographics, income, race, ethnicity, protected class variables, or fair-housing-risk variables.
+
+Opportunity Zone context is used only as policy and incentive context. It is not demographic targeting.
+
+Scores should be interpreted as a transparent prioritization aid for demonstration workflows. They are not a substitute for parcel due diligence, zoning review, flood review, access analysis, title review, appraisal, underwriting, or legal advice.
+
 ## 8. GeoJSON Export
 
 Export selected submarkets and candidate sites to `EPSG:4326` GeoJSON for platform compatibility and interactive web mapping.

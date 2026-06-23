@@ -78,7 +78,7 @@ Expected project deliverables include:
 
 ## Current Status
 
-Milestone 7 in progress: candidate-site screening foundation refined with edge-fragment QA rule.
+Milestone 8 in progress: weighted candidate scoring and ranking workflow added.
 
 ## Limitations
 

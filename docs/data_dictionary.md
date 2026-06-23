@@ -68,6 +68,16 @@ Draft planned fields for future pipeline outputs. Field names may change after r
 
 | Field | Description |
 |---|---|
+| `size_score` | 0-100 proxy score for candidate size suitability relative to the 25-120 acre ideal range. |
+| `grid_completeness_score` | 0-100 score based on how much of the full 1,000m grid cell remains after clipping. |
+| `submarket_score` | Neutral 0-100 score based on moderated candidate supply distribution by analyst-defined submarket. Does not imply demand or performance. |
+| `opportunity_score` | 0-100 policy/incentive context score based on Opportunity Zone overlap. Not demographic targeting. |
+| `school_context_score` | 0-100 neutral context completeness score based only on whether a clean school district assignment exists. |
+| `geometry_score` | 0-100 geometry reliability score based on geometry validity. |
+| `final_site_score` | Weighted final proxy sourcing score. |
+| `candidate_rank` | Deterministic rank among qualified proxy candidates, with 1 as the highest score. |
+| `scoring_model_version` | Scoring model version identifier. Current value: `v1_proxy_candidate_scoring`. |
+| `scoring_note` | Limitation note stating that the score is a transparent proxy ranking for portfolio demonstration and not legal parcel valuation or development feasibility. |
 | `score_total` | Final weighted score. |
 | `score_access` | Transportation and access score. |
 | `score_market` | Market or submarket context score. |

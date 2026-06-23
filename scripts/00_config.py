@@ -46,6 +46,11 @@ DISQUALIFIED_CANDIDATES_GEOJSON = FINAL_GEOJSON_DIR / "disqualified_candidate_si
 DISQUALIFICATION_AUDIT_CSV = FINAL_CSV_DIR / "disqualification_audit.csv"
 CANDIDATE_SUMMARY_CSV = FINAL_CSV_DIR / "candidate_summary.csv"
 PARCEL_SCREENING_GPKG = FINAL_GPKG_DIR / "parcel_screening_foundation.gpkg"
+RANKED_SITE_CANDIDATES_GEOJSON = FINAL_GEOJSON_DIR / "ranked_site_candidates.geojson"
+TOP_25_CANDIDATE_SITES_GEOJSON = FINAL_GEOJSON_DIR / "top_25_candidate_sites.geojson"
+RANKED_SITE_CANDIDATES_CSV = FINAL_CSV_DIR / "ranked_site_candidates.csv"
+CANDIDATE_SCORE_COMPONENTS_CSV = FINAL_CSV_DIR / "candidate_score_components.csv"
+RANKED_CANDIDATES_GPKG = FINAL_GPKG_DIR / "ranked_candidate_sites.gpkg"
 
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 MAPS_DIR = OUTPUTS_DIR / "maps"
