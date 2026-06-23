@@ -12,7 +12,15 @@ Standardize field names, repair invalid geometries, remove empty geometries, con
 
 ## 3. ZCTA Submarket Creation
 
-Use Census ZCTA boundaries and regional boundary layers to define DFW / Dallas County submarket geographies for aggregation, filtering, and map presentation.
+Use Census ZCTA boundaries and the Census-derived DFW CBSA boundary to create analyst-defined submarket polygons for aggregation, filtering, and map presentation.
+
+### ZCTA-Based Submarket Creation
+
+The project uses U.S. Census ZCTA geography as the base unit for the first portfolio demonstration submarket workflow. These submarkets are analyst-defined directional sector proxies based on each ZCTA centroid's position relative to the DFW CBSA centroid.
+
+The workflow demonstrates a reproducible ZIP/ZCTA-to-submarket polygon production process: standardize ZCTA IDs, assign each ZCTA to a deterministic directional sector, join the assignment back to the ZCTA layer, dissolve by submarket, calculate area in `EPSG:32138`, and export platform-ready GeoJSON in `EPSG:4326`.
+
+These polygons are not official commercial, brokerage, county, city, government, zoning, or regulatory boundaries. They are portfolio demonstration proxies for organizing DFW ZCTAs into readable real estate market sectors.
 
 ## 4. Real Estate Layer Factory
 

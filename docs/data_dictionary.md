@@ -7,8 +7,14 @@ Draft planned fields for future pipeline outputs. Field names may change after r
 | Field | Description |
 |---|---|
 | `submarket_id` | Stable identifier for each submarket. |
-| `zcta` | ZCTA code where applicable. |
+| `zcta` | Standardized five-character Census ZCTA code used for assignment. |
 | `submarket_name` | Human-readable submarket label. |
+| `zcta_count` | Count of ZCTAs assigned to the dissolved submarket polygon. |
+| `zcta_list` | Semicolon-delimited list of ZCTAs included in the submarket. |
+| `total_area_sq_km` | Dissolved submarket area in square kilometers, calculated in the analysis CRS. |
+| `definition_method` | Method used to assign ZCTAs to submarkets. Current value: `centroid_direction_sector_proxy`. |
+| `is_official_submarket` | Boolean flag indicating whether the boundary is official. Current analyst-defined proxy value is `False`. |
+| `source_note` | Limitation note explaining that the grouping is an analyst-defined ZCTA sector proxy for portfolio demonstration and not an official commercial submarket boundary. |
 | `county_name` | County name associated with the submarket. |
 | `cbsa_name` | Metropolitan area name. |
 | `area_sq_mi` | Submarket area in square miles, calculated in the analysis CRS. |

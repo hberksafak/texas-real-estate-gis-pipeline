@@ -78,7 +78,7 @@ Expected project deliverables include:
 
 ## Current Status
 
-Milestone 3 in progress: Census boundary workflow added for DFW / Dallas study area setup.
+Milestone 4 in progress: ZCTA-based DFW submarket builder added.
 
 ## Limitations
 
