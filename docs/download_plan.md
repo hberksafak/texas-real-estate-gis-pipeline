@@ -16,7 +16,7 @@ This milestone does not download data, create fake data, create notebooks, or im
 | 4 | NCTCOG 2020 Land Use | Provides regional context and land-use proxy after the study area is defined. | `data/raw/nctcog/` |
 | 5 | TxDOT roads | Enables road access and accessibility context. | `data/raw/txdot/` |
 | 6 | FEMA National Flood Hazard Layer | Adds constraint overlay for screening and penalty logic. | `data/raw/fema_nfhl/` |
-| 7 | Texas school district boundaries | Adds neutral context overlay. | `data/raw/tea_school_districts/` |
+| 7 | Texas school district boundaries | Adds neutral context overlay. | `data/raw/texas_school_districts/` |
 | 8 | HUD Opportunity Zones | Adds incentive/context geography. | `data/raw/hud_opportunity_zones/` |
 | 9 | Dallas CAD parcel data | Enables the Dallas County parcel screening pilot after core context is staged. | `data/raw/dallas_cad/` |
 | 10 | OSM amenities / roads | Adds supplemental services and amenity context via OSMnx. | `data/raw/osm/` |
@@ -100,3 +100,13 @@ The first real-data milestone should then create documented local source folders
 - Raw Census ZIPs are stored locally under `data/raw/census_tiger_2025/`.
 - Final study area outputs are stored locally under `data/final/`.
 - Raw and generated outputs are intentionally not committed to git.
+
+## Milestone 6B Manual Staging Notes
+
+- HUD Opportunity Zones were staged locally under `data/raw/hud_opportunity_zones/`.
+- Texas school district data was staged locally under `data/raw/texas_school_districts/`.
+- The Texas Capitol / Texas Legislative Council school district download attempt was blocked, so U.S. Census TIGER/Line 2025 Texas Unified School Districts was used as the official accessible fallback.
+- The school district ZIP used by the project was `data/raw/texas_school_districts/tl_2025_48_unsd.zip`.
+- The catalog workflow now produces `data/final/geojson/dfw_opportunity_zones.geojson`, `data/final/geojson/dfw_school_districts.geojson`, `data/final/csv/real_estate_layer_catalog.csv`, and `data/final/gpkg/real_estate_layer_catalog.gpkg`.
+- Current catalog status includes six available layers: `dallas_county_boundary`, `dfw_cbsa_boundary`, `dfw_zctas`, `dfw_zcta_submarkets`, `dfw_opportunity_zones`, and `dfw_school_districts`.
+- Generated raw and final outputs remain ignored and are not committed to git.

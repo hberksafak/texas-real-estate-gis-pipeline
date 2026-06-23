@@ -2,7 +2,7 @@
 
 Verified source plan for the Texas Real Estate Sourcing GIS Pipeline & Parcel Screening System.
 
-No data has been downloaded yet. This document records the intended source systems, planned use, and source-specific limitations before the first real-data milestone.
+This document records intended source systems, staged-source decisions, planned use, and source-specific limitations. Raw and generated GIS files remain local and are not committed to git.
 
 | Priority | Source | Planned Use | Decision | Notes |
 |---:|---|---|---|---|
@@ -10,7 +10,7 @@ No data has been downloaded yet. This document records the intended source syste
 | 2 | NCTCOG Regional Data Center / Open Data | Regional GIS context, land use / land cover proxy, and DFW regional context layers | Use as official regional source. | 2020 Land Use is a useful zoning/land-use style proxy. Treat as context/proxy, not legal zoning. |
 | 3 | TxDOT Roadway Inventory / TxDOT GIS Open Data | Road access proximity and accessibility metrics | Use for transportation context and proximity calculations. | Prefer TxDOT GIS Open Data and Roadway Inventory layers for authoritative roadway context. |
 | 4 | FEMA National Flood Hazard Layer | Flood constraint overlay and flood disqualification or penalty metric | Use current effective flood hazard data only. | Prefer county/state shapefile or service download. Treat as a screening layer, not an engineering, insurance, or legal flood determination. |
-| 5 | Texas School District Boundaries | School district context overlay | Use as neutral context only. | Prefer Texas Legislative Council / Texas Capitol Data Portal 2025-2026 School Year Districts shapefile if accessible. Do not use for discriminatory or fair-housing-risk ranking. Keep analysis language neutral and descriptive. If a stable direct download URL is not confirmed, place the official file manually under `data/raw/texas_school_districts/`. |
+| 5 | Texas School District Boundaries | School district context overlay | Use as neutral context only. | Keep Texas Legislative Council / Texas Capitol Data Portal 2025-2026 School Year Districts documented as the intended official school district source. Access may be blocked by Cloudflare or may not be stable for automated download. Milestone 6B used U.S. Census TIGER/Line 2025 Texas Unified School Districts (`tl_2025_48_unsd.zip`) as the official accessible fallback. Do not use school districts for discriminatory ranking, fair-housing-risk targeting, or demographic targeting. |
 | 6 | HUD Opportunity Zones | Incentive/context overlay | Use as business and incentive context. | Use HUD Open Data / ArcGIS Hub source. Do not use demographic targeting language. Use the tract overlay only as a policy/incentive geography. If a stable direct download URL is not confirmed, place the official file manually under `data/raw/hud_opportunity_zones/`. |
 | 7 | Dallas Central Appraisal District GIS data products | Dallas County parcel screening pilot if parcel shapefile is downloadable and suitable | Use for parcel pilot only after size, schema, license, and suitability checks. | 2026 parcel geometry zip may be named `PARCEL_GEOM.zip`. Document DCAD limitations and disclaimer. Do not claim survey, engineering, or legal accuracy. If blocked or too large, use a candidate polygon proxy instead. |
 | 8 | OpenStreetMap via OSMnx | Amenities, services, and road/service access support layer | Use as supporting accessibility source only. | Attribute OpenStreetMap contributors. Treat OSM as supplemental rather than authoritative parcel, zoning, or regulatory data. |
@@ -22,6 +22,7 @@ No data has been downloaded yet. This document records the intended source syste
 |---|---|
 | U.S. Census TIGER/Line Shapefiles | <https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html> |
 | U.S. Census TIGER/Line 2025 FTP archive | <https://www2.census.gov/geo/tiger/TIGER2025/> |
+| U.S. Census TIGER/Line 2025 Texas Unified School Districts fallback | <https://www2.census.gov/geo/tiger/TIGER2025/UNSD/tl_2025_48_unsd.zip> |
 | NCTCOG Regional Data Center / Open Data | <https://data-nctcoggis.opendata.arcgis.com/> |
 | Dallas CAD GIS Data Products | <https://www.dallascad.org/GISDataProducts.aspx> |
 | Dallas CAD Data Products | <https://www.dallascad.org/DataProducts.aspx> |
@@ -43,4 +44,6 @@ No data has been downloaded yet. This document records the intended source syste
 - Use Dallas CAD parcel geometry only after confirming that the downloadable parcel shapefile is usable for the pilot workflow.
 - Keep flood, school district, and Opportunity Zone layers as screening/context overlays with careful limitation language.
 - For Milestone 6, use manual raw-file fallback detection for HUD Opportunity Zones and Texas school districts unless stable official direct download URLs are confirmed.
+- For Milestone 6B, HUD Opportunity Zones were staged under `data/raw/hud_opportunity_zones/`. Texas Capitol / Texas Legislative Council school district access was blocked, so the project used U.S. Census TIGER/Line 2025 Texas Unified School Districts from `data/raw/texas_school_districts/tl_2025_48_unsd.zip` as an official accessible fallback.
+- School districts remain neutral education context overlays only. They are not ranking criteria, demographic targeting inputs, or fair-housing-risk targeting inputs.
 - Use OSMnx and Microsoft building footprints as optional/supporting enrichment sources, not as replacements for official public sources.

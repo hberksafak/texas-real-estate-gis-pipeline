@@ -78,7 +78,7 @@ Expected project deliverables include:
 
 ## Current Status
 
-Milestone 6 in progress: platform-ready real estate layer catalog workflow added.
+Milestone 6B complete: platform-ready layer catalog now includes Opportunity Zones and school district context layers.
 
 ## Limitations
 
