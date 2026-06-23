@@ -10,6 +10,14 @@ Organize downloaded GIS sources by provider, geography, and date. Preserve origi
 
 Standardize field names, repair invalid geometries, remove empty geometries, confirm CRS metadata, and create consistent processed layers in `data/processed/`.
 
+### Reusable GIS Cleaning and Validation Factory
+
+Government and public GIS layers often arrive with different schemas, CRS metadata, geometry validity issues, duplicate records, and occasional empty geometries. The project uses a reusable validation workflow so each layer is checked consistently before it is used in downstream screening, scoring, mapping, or export steps.
+
+The validation factory standardizes every input layer to the project platform CRS, `EPSG:4326`, for final delivery compatibility. Area calculations are performed separately in the DFW analysis CRS, `EPSG:32138`, so reported square-kilometer measurements are calculated in a projected coordinate system rather than from geographic coordinates.
+
+For each layer, the workflow normalizes column names to lowercase snake case, repairs invalid geometries using Shapely `make_valid` when available or `buffer(0)` as a fallback, removes empty or null geometries, checks for exact duplicate records, and writes a validation report. Cleaned layers are exported to a GeoPackage while preserving `EPSG:4326` platform-ready output geometry.
+
 ## 3. ZCTA Submarket Creation
 
 Use Census ZCTA boundaries and the Census-derived DFW CBSA boundary to create analyst-defined submarket polygons for aggregation, filtering, and map presentation.

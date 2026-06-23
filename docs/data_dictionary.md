@@ -60,3 +60,25 @@ Draft planned fields for future pipeline outputs. Field names may change after r
 | `score_strategy` | Strategic fit score. |
 | `rank_overall` | Overall rank among qualified candidates. |
 | `score_notes` | Notes explaining scoring exceptions or manual review flags. |
+
+## Layer Validation Report
+
+Fields written to `data/final/csv/layer_validation_report.csv`.
+
+| Field | Description |
+|---|---|
+| `layer_name` | Logical layer name used by the validation workflow. |
+| `input_path` | Source file path read by the validation workflow. |
+| `feature_count_before` | Feature count immediately after reading the input layer. |
+| `feature_count_after` | Feature count after CRS standardization, geometry cleaning, empty-geometry removal, and duplicate checks. |
+| `crs_before` | CRS reported by the input layer. |
+| `crs_after` | CRS after validation, expected to be `EPSG:4326`. |
+| `geometry_types` | Semicolon-delimited geometry types present after validation. |
+| `invalid_geometries_before` | Count of invalid non-empty geometries before repair. |
+| `invalid_geometries_after` | Count of invalid non-empty geometries after repair. |
+| `empty_geometries_before` | Count of null or empty geometries before cleaning. |
+| `empty_geometries_after` | Count of null or empty geometries after cleaning. |
+| `duplicate_rows_removed` | Number of exact duplicate records removed. |
+| `total_area_sq_km` | Total layer area in square kilometers, calculated in `EPSG:32138`. |
+| `status` | Validation status, such as `passed`, `warning`, or `failed`. |
+| `notes` | Human-readable validation notes and repair actions. |

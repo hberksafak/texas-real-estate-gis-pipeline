@@ -78,7 +78,7 @@ Expected project deliverables include:
 
 ## Current Status
 
-Milestone 4 in progress: ZCTA-based DFW submarket builder added.
+Milestone 5 in progress: reusable GIS layer cleaning and validation workflow added.
 
 ## Limitations
 

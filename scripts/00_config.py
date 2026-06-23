@@ -32,6 +32,8 @@ STUDY_AREA_SUMMARY_CSV = FINAL_CSV_DIR / "study_area_summary.csv"
 DFW_SUBMARKETS_GEOJSON = FINAL_GEOJSON_DIR / "dfw_zcta_submarkets.geojson"
 SUBMARKET_SUMMARY_CSV = FINAL_CSV_DIR / "submarket_summary.csv"
 DFW_SUBMARKETS_GPKG = FINAL_GPKG_DIR / "dfw_submarkets.gpkg"
+VALIDATION_REPORT_CSV = FINAL_CSV_DIR / "layer_validation_report.csv"
+VALIDATED_LAYERS_GPKG = FINAL_GPKG_DIR / "validated_real_estate_layers.gpkg"
 
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 MAPS_DIR = OUTPUTS_DIR / "maps"
