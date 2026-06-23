@@ -78,7 +78,7 @@ Expected project deliverables include:
 
 ## Current Status
 
-Milestone 8 in progress: weighted candidate scoring and ranking workflow added.
+Milestone 9 in progress: platform-ready GeoJSON export package added.
 
 ## Limitations
 

@@ -127,3 +127,37 @@ Fields written to `data/final/csv/real_estate_layer_catalog.csv`.
 | `gpkg_layer_name` | GeoPackage layer name when exported. |
 | `status` | Availability status, such as `available` or `missing`. |
 | `notes` | Source limitations, optional-layer fallback notes, and neutral-use warnings. |
+
+## Platform Layers Manifest
+
+Fields written to `data/final/csv/platform_layers_manifest.csv`.
+
+| Field | Description |
+|---|---|
+| `layer_name` | Platform export layer name. |
+| `category` | Layer category, such as `boundary`, `submarket`, `incentive_context`, `education_context`, `candidate_screening`, or `candidate_ranking`. |
+| `input_path` | Source GeoJSON path used for the platform export. |
+| `output_geojson_path` | Platform-ready GeoJSON export path. |
+| `gpkg_layer_name` | Matching layer name in `export_ready_layers.gpkg`. |
+| `feature_count` | Number of features exported. |
+| `geometry_types` | Semicolon-delimited geometry types present after export cleaning. |
+| `crs` | Export CRS, expected to be `EPSG:4326`. |
+| `total_area_sq_km` | Total layer area in square kilometers, calculated in `EPSG:32138`. |
+| `file_size_mb` | GeoJSON file size in megabytes. |
+| `status` | Export status for the layer. |
+| `notes` | Delivery notes and context-use limitations. |
+
+## Platform Export Summary
+
+Fields written to `data/final/csv/platform_export_summary.csv`.
+
+| Field | Description |
+|---|---|
+| `total_layers_expected` | Count of expected platform export layers. |
+| `total_layers_exported` | Count of layers successfully exported. |
+| `total_layers_missing` | Count of expected layers that were not present at export time. |
+| `total_features_exported` | Total features across exported layers. |
+| `total_geojson_size_mb` | Combined GeoJSON export size in megabytes. |
+| `export_crs` | CRS used for platform GeoJSON exports, expected to be `EPSG:4326`. |
+| `export_package_status` | Overall package status, such as `complete` or `partial`. |
+| `export_note` | Package-level delivery notes and context-use limitations. |

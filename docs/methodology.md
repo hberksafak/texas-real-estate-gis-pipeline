@@ -86,6 +86,16 @@ Scores should be interpreted as a transparent prioritization aid for demonstrati
 
 Export selected submarkets and candidate sites to `EPSG:4326` GeoJSON for platform compatibility and interactive web mapping.
 
+### Platform-Ready GeoJSON Export Package
+
+The final delivery workflow packages project layers as platform-ready GeoJSON because GeoJSON is broadly supported by web maps, portfolio demos, lightweight GIS viewers, and downstream location-intelligence tools. Each export is standardized to `EPSG:4326` so browser maps and common geospatial platforms can read the layers without additional reprojection.
+
+The export package is manifest-driven. Each exported layer is listed with its category, source path, platform GeoJSON path, feature count, geometry types, CRS, file size, and area summary. A separate export summary records expected layers, exported layers, missing layers, total features, total GeoJSON size, and package status.
+
+The same export-ready layers are also written to a GeoPackage for desktop GIS review and handoff. GeoPackage delivery keeps related layers together while the GeoJSON folder supports platform upload workflows.
+
+Candidate layers remain analyst-defined grid proxy polygons and are not official parcels. School district layers are neutral context overlays only. Opportunity Zones are included only as policy and incentive context.
+
 ## 9. QGIS Atlas
 
 Use QGIS layouts and atlas tooling to generate static map packages for shortlisted submarkets and candidate sites.
