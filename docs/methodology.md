@@ -1,121 +1,88 @@
 # Methodology
 
-This document outlines the planned analytical workflow. It will be updated once real data sources, assumptions, and outputs are finalized.
+This document summarizes the end-to-end methodology for the Texas Real Estate Sourcing GIS Pipeline & Parcel Screening System.
 
-## 1. Source Preparation
+## 1. Source Verification
 
-Organize downloaded GIS sources by provider, geography, and date. Preserve original files and metadata in `data/raw/` while keeping source data out of version control.
+The project starts with documented source verification and a download plan. Source notes identify intended providers, source limitations, fallback decisions, and local staging folders. Raw and generated GIS files stay local and are intentionally excluded from git.
 
-## 2. Cleaning and Validation
+Current source families include Census TIGER/Line 2025 boundaries, HUD Opportunity Zones, and school district context. Texas Capitol / Texas Legislative Council school district data remains documented as an intended source, while Census TIGER/Line 2025 Texas Unified School Districts were used as an official accessible fallback.
 
-Standardize field names, repair invalid geometries, remove empty geometries, confirm CRS metadata, and create consistent processed layers in `data/processed/`.
+## 2. Census Boundary Workflow
 
-### Reusable GIS Cleaning and Validation Factory
+The first real-data workflow uses Census TIGER/Line 2025 county, CBSA, and ZCTA layers. It creates the Dallas County boundary, DFW CBSA boundary, and DFW-intersecting ZCTA layer.
 
-Government and public GIS layers often arrive with different schemas, CRS metadata, geometry validity issues, duplicate records, and occasional empty geometries. The project uses a reusable validation workflow so each layer is checked consistently before it is used in downstream screening, scoring, mapping, or export steps.
+Final platform exports use `EPSG:4326`. DFW distance and area calculations use `EPSG:32138`.
 
-The validation factory standardizes every input layer to the project platform CRS, `EPSG:4326`, for final delivery compatibility. Area calculations are performed separately in the DFW analysis CRS, `EPSG:32138`, so reported square-kilometer measurements are calculated in a projected coordinate system rather than from geographic coordinates.
+## 3. ZCTA Submarket Proxy Creation
 
-For each layer, the workflow normalizes column names to lowercase snake case, repairs invalid geometries using Shapely `make_valid` when available or `buffer(0)` as a fallback, removes empty or null geometries, checks for exact duplicate records, and writes a validation report. Cleaned layers are exported to a GeoPackage while preserving `EPSG:4326` platform-ready output geometry.
+The project uses Census ZCTA geography as the base unit for analyst-defined real estate submarket proxy polygons. Each ZCTA is assigned to a deterministic directional sector based on its centroid relative to the DFW CBSA centroid, then dissolved into submarket polygons.
 
-## 3. ZCTA Submarket Creation
+These submarkets are not official commercial, brokerage, county, city, government, zoning, or regulatory boundaries. They are portfolio demonstration proxies for organizing DFW ZCTAs into readable real estate market sectors.
 
-Use Census ZCTA boundaries and the Census-derived DFW CBSA boundary to create analyst-defined submarket polygons for aggregation, filtering, and map presentation.
+## 4. Layer Validation
 
-### ZCTA-Based Submarket Creation
+Government and public GIS layers often arrive with inconsistent schemas, CRS metadata, invalid geometries, duplicate records, and empty geometries. The reusable validation workflow standardizes layers before they are used in downstream screening, scoring, mapping, or exports.
 
-The project uses U.S. Census ZCTA geography as the base unit for the first portfolio demonstration submarket workflow. These submarkets are analyst-defined directional sector proxies based on each ZCTA centroid's position relative to the DFW CBSA centroid.
+Validation steps include lowercase snake-case field names, CRS standardization to `EPSG:4326`, invalid geometry repair with Shapely `make_valid` or `buffer(0)`, empty geometry removal, duplicate checks, and area calculation in `EPSG:32138`.
 
-The workflow demonstrates a reproducible ZIP/ZCTA-to-submarket polygon production process: standardize ZCTA IDs, assign each ZCTA to a deterministic directional sector, join the assignment back to the ZCTA layer, dissolve by submarket, calculate area in `EPSG:32138`, and export platform-ready GeoJSON in `EPSG:4326`.
+## 5. Context Layer Catalog
 
-These polygons are not official commercial, brokerage, county, city, government, zoning, or regulatory boundaries. They are portfolio demonstration proxies for organizing DFW ZCTAs into readable real estate market sectors.
+The real estate layer catalog packages boundaries, submarkets, Opportunity Zones, and school district context into platform-ready GIS layers. The catalog records source, category, feature count, geometry types, CRS, area, output paths, status, and notes.
 
-## 4. Real Estate Layer Factory
+School district boundaries are neutral education context overlays only. They are not ranking criteria, demographic targeting inputs, or fair-housing-risk scoring variables.
 
-Create reusable real estate context layers, including parcels, roads, flood zones, school districts, opportunity zones, amenities, and other investment-relevant overlays.
+HUD Opportunity Zones are policy and incentive context only. They are not demographic targeting inputs.
 
-### Platform-Ready Real Estate Layer Catalog
+## 6. Candidate Screening Foundation
 
-Real estate GIS workflows need a clean layer catalog so analysts can see which boundaries, submarkets, and context overlays are available, where each layer came from, how many features it contains, and which platform-ready files should be used for mapping or downstream analysis.
+Official Dallas CAD parcel data is not used yet. Until parcel geometry is acquired and validated, the project uses analyst-defined grid proxy polygons clipped to Dallas County. These polygons are labeled with `candidate_source = analyst_defined_grid_proxy` and `is_official_parcel = False`.
 
-The catalog packages existing Census-derived boundaries, ZCTA layers, analyst-defined submarkets, and controlled public context overlays into GeoJSON and GeoPackage outputs. All final platform layers are standardized to `EPSG:4326`, while area fields are calculated in `EPSG:32138` for DFW-appropriate projected measurements.
+The proxy approach allows the project to develop screening logic, context overlays, output schemas, and audit tables against real geography without inventing parcel ownership or legal parcel boundaries.
 
-School district boundaries are included only as neutral education context overlays. They are not ranking criteria, demographic targeting inputs, or fair-housing-risk scoring variables.
+Initial screening rules check geometry validity, minimum and maximum area, boundary-edge fragmentation, and submarket assignment. Boundary-edge fragments below 60% of a full 1,000m grid cell are disqualified because partial clipped proxy cells are less reliable for candidate screening. Each candidate receives failed rule counts, failed rule names, primary disqualification reason, and screening stage.
 
-HUD Opportunity Zones are included only as policy and incentive context for business review. They are not used as demographic targeting inputs.
+School district context and Opportunity Zone context are not qualification rules.
 
-## 5. Parcel and Candidate Screening
+## 7. Weighted Scoring And Ranking
 
-Apply transparent screening rules to identify candidate parcels or sites. Planned rules may include parcel size, location, zoning or land-use context, access, flood exposure, and exclusion constraints.
+The v1 scoring model ranks only qualified analyst-defined grid proxy candidates. It is a transparent proxy sourcing score for portfolio demonstration, not legal parcel valuation, entitlement review, engineering assessment, appraisal, underwriting, or development feasibility.
 
-### Candidate Site Screening Foundation
+The weighted model uses:
 
-Official parcel data is not used yet. Until Dallas CAD parcel geometry is acquired and validated, the project uses analyst-defined grid proxy polygons clipped to Dallas County as a documented candidate-site screening base. These proxy polygons are not official parcels and are labeled with `candidate_source = analyst_defined_grid_proxy` and `is_official_parcel = False`.
+- 25% size suitability
+- 20% grid completeness / shape reliability
+- 20% neutral submarket candidate-supply context
+- 15% Opportunity Zone incentive context
+- 10% school district context completeness
+- 10% geometry reliability
 
-This proxy approach is useful for developing the screening workflow before parcel acquisition because it lets the project test geometry handling, area thresholds, submarket assignment, context overlays, output schemas, and audit tables against real geography without inventing parcel ownership or legal parcel boundaries.
+School district context is neutral context completeness only. The model does not use school quality, school ratings, demographics, income, race, ethnicity, protected-class variables, or fair-housing-risk variables.
 
-Initial screening rules validate geometry, minimum and maximum candidate area, boundary-edge grid fragmentation, and submarket assignment. Boundary-edge fragments are disqualified when a clipped grid cell retains less than 60% of the full 1,000m grid cell area because these partial proxy cells are less reliable for candidate screening than complete interior cells. Each candidate receives a disqualification audit trail with failed rule counts, semicolon-delimited failed rule names, a primary disqualification reason, and a screening stage.
+Opportunity Zone context is policy/incentive context only.
 
-School district context is included only as a neutral education context overlay. It is not a qualification rule, ranking criterion, demographic targeting input, or fair-housing-risk targeting input.
+## 8. Platform-Ready Exports
 
-Opportunity Zones are included only as policy and incentive context. Opportunity Zone overlap is not a qualification rule and is not used for demographic targeting.
+The final export workflow packages key layers as platform-ready GeoJSON files in `EPSG:4326`, a manifest CSV, an export summary CSV, and a GeoPackage.
 
-## 6. Disqualification Audit Trail
+The manifest records category, input path, output path, feature count, geometry types, CRS, file size, area, status, and notes. GeoPackage delivery keeps related layers together for QGIS or desktop GIS review, while the GeoJSON folder supports upload to web mapping and portfolio platforms.
 
-Maintain explicit audit fields for each disqualification rule so rejected parcels can be reviewed and explained rather than silently removed.
+## 9. Interactive Web Map
 
-## 7. Weighted Scoring
+The interactive Folium/Leaflet map visualizes the platform-ready GeoJSON package. It includes core boundaries, ZCTA submarket proxies, Opportunity Zones, school district context, qualified and disqualified proxy candidates, ranked candidates, and the top 25 candidates.
 
-Score qualified candidates with configurable weighted criteria. Planned scoring categories include access, market context, constraint risk, amenity proximity, and strategic fit.
+The map is a client-facing demonstration artifact for reviewing geography, screening outputs, rankings, and context layers without desktop GIS software.
 
-### Weighted Candidate Scoring and Ranking
+## 10. Static Map Exports
 
-The first candidate ranking model scores only qualified analyst-defined grid proxy candidates. It is a transparent proxy sourcing score for portfolio demonstration, not a legal parcel valuation, entitlement review, engineering assessment, or development feasibility determination.
+Static PNG/PDF map exports provide portfolio-ready visuals for website screenshots, case-study figures, PDF inserts, and optional QGIS refinement. They complement the interactive map with fixed views of the study area, screening workflow, and top-ranked proxy sites.
 
-The v1 scoring model uses weighted 0-100 component scores: 25% size suitability, 20% grid completeness / shape reliability, 20% neutral submarket candidate-supply context, 15% Opportunity Zone incentive context, 10% school district context completeness, and 10% geometry reliability.
+Static maps are plotted in `EPSG:32138` for consistent DFW map geometry and exported to `outputs/maps/`.
 
-Size suitability favors candidates in the 25-120 acre ideal proxy range, with tapering outside that range. Grid completeness rewards near-full grid cells over clipped cells. Submarket context uses a moderated, reproducible candidate-distribution proxy and does not imply market demand, pricing, rent growth, or investment performance.
+## 11. Limitations
 
-School district context is neutral context completeness only. The model does not use school quality, school ratings, demographics, income, race, ethnicity, protected class variables, or fair-housing-risk variables.
+No official parcel ownership or legal parcel boundary data is used yet. Candidate polygons are analyst-defined grid proxies, not official parcels.
 
-Opportunity Zone context is used only as policy and incentive context. It is not demographic targeting.
+Scores are proxy rankings for portfolio demonstration, not legal development feasibility, valuation, appraisal, underwriting, zoning, flood, engineering, or entitlement determinations.
 
-Scores should be interpreted as a transparent prioritization aid for demonstration workflows. They are not a substitute for parcel due diligence, zoning review, flood review, access analysis, title review, appraisal, underwriting, or legal advice.
-
-## 8. GeoJSON Export
-
-Export selected submarkets and candidate sites to `EPSG:4326` GeoJSON for platform compatibility and interactive web mapping.
-
-### Platform-Ready GeoJSON Export Package
-
-The final delivery workflow packages project layers as platform-ready GeoJSON because GeoJSON is broadly supported by web maps, portfolio demos, lightweight GIS viewers, and downstream location-intelligence tools. Each export is standardized to `EPSG:4326` so browser maps and common geospatial platforms can read the layers without additional reprojection.
-
-The export package is manifest-driven. Each exported layer is listed with its category, source path, platform GeoJSON path, feature count, geometry types, CRS, file size, and area summary. A separate export summary records expected layers, exported layers, missing layers, total features, total GeoJSON size, and package status.
-
-The same export-ready layers are also written to a GeoPackage for desktop GIS review and handoff. GeoPackage delivery keeps related layers together while the GeoJSON folder supports platform upload workflows.
-
-Candidate layers remain analyst-defined grid proxy polygons and are not official parcels. School district layers are neutral context overlays only. Opportunity Zones are included only as policy and incentive context.
-
-## 9. QGIS Atlas
-
-Use QGIS layouts and atlas tooling to generate static map packages for shortlisted submarkets and candidate sites.
-
-### Static Portfolio Map Exports
-
-Static map exports provide portfolio-ready visuals for website screenshots, case-study figures, PDF inserts, and optional QGIS refinement. They complement the interactive web map by giving reviewers fixed, curated views of the study area, candidate screening workflow, and top-ranked proxy sites.
-
-The static export workflow uses the platform-ready GeoJSON package and plots layers in `EPSG:32138` for consistent DFW map geometry. PNG and PDF outputs are written to `outputs/maps/` and a summary table documents the map name, files, layers used, purpose, status, and notes.
-
-Candidate geometries shown in these maps are analyst-defined grid proxy polygons and are not official parcels. School district context remains neutral context only. Opportunity Zones remain policy and incentive context only.
-
-## 10. Interactive Web Map
-
-Create an interactive web map for portfolio presentation and stakeholder review after real outputs are available.
-
-### Interactive Web Map Demo
-
-The interactive demo visualizes the final platform-ready GeoJSON package in a Folium/Leaflet web map. Core boundaries, ZCTA-based submarkets, Opportunity Zones, school district context, qualified and disqualified proxy candidates, ranked candidates, and the top 25 candidates can be toggled through the map layer control.
-
-The map is a client-facing demonstration artifact: it lets a reviewer inspect the pipeline's geography, screening outputs, rankings, and context layers without opening desktop GIS software. Heavier candidate and context layers are available as optional overlays so the initial view stays readable.
-
-Candidate polygons remain analyst-defined grid proxies and are not official parcels. Scores are transparent proxy rankings for portfolio demonstration only. School district context is neutral context only. Opportunity Zones are policy and incentive context only.
+School district context is neutral context only. Opportunity Zones are policy/incentive context only. This project does not use demographic targeting language or protected-class logic.

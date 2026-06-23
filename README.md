@@ -1,72 +1,110 @@
 # Texas Real Estate Sourcing GIS Pipeline & Parcel Screening System
 
-## Portfolio Description
+## Summary
 
-A portfolio-grade Python/QGIS GIS pipeline skeleton for sourcing and screening real estate opportunities in the Dallas-Fort Worth market, with an initial focus on Dallas County and surrounding DFW submarkets.
+A portfolio-grade Python/QGIS GIS pipeline for real estate sourcing in the Dallas-Fort Worth market, with a Dallas County candidate-screening demonstration. The project turns public GIS layers into validated boundaries, analyst-defined submarkets, candidate-site proxy polygons, ranked sourcing outputs, platform-ready GeoJSON files, static map exports, and an interactive Folium web map.
 
-The planned system will prepare public GIS sources, create analysis-ready real estate layers, screen parcel or candidate-site opportunities, rank locations using transparent scoring rules, and export web/platform-ready geospatial deliverables.
+## Problem Statement
 
-## Business Question
+Real estate sourcing teams need repeatable geospatial workflows that can move from raw public GIS data to defensible screening layers, explainable candidate ranking, and polished deliverables. This project asks:
 
-Where in the DFW / Dallas County market are the strongest real estate sourcing opportunities after accounting for location fundamentals, parcel constraints, flood risk, transportation access, amenities, school district context, and other investment screening criteria?
+Where in the DFW / Dallas County market are promising candidate areas after applying transparent geography, context, screening, and proxy scoring logic?
 
-## Target Client Type
+## What The Pipeline Does
 
-This project is designed for real estate investors, acquisition teams, site-selection consultants, developers, and portfolio managers who need repeatable GIS-driven sourcing workflows rather than one-off map exhibits.
+The pipeline:
 
-## Geographic Focus
+1. Downloads and stages Census TIGER/Line 2025 boundaries.
+2. Builds DFW and Dallas County study area layers.
+3. Creates analyst-defined ZCTA-based submarket proxy polygons.
+4. Validates and catalogs project GIS layers.
+5. Adds Opportunity Zone and school district context layers.
+6. Creates analyst-defined candidate-site grid proxy polygons.
+7. Applies transparent screening rules and disqualification audit logic.
+8. Scores and ranks qualified proxy candidates.
+9. Exports platform-ready GeoJSON and GeoPackage packages.
+10. Builds an interactive web map and static PNG/PDF portfolio maps.
 
-The first implementation target is DFW, with Dallas County as the primary county-level focus. The repository is structured so additional North Texas counties and regional datasets can be added later without changing the core workflow design.
+## Key Outputs
 
-## Planned Data Sources
+- Platform-ready GeoJSON package
+- GeoPackage exports for desktop GIS review
+- Candidate screening audit trail
+- Weighted candidate ranking
+- Top 25 candidate sites layer
+- Interactive Folium web map
+- Static PNG/PDF portfolio maps
+- Documentation and methodology files
 
-Planned sources include:
+Generated data and map outputs are intentionally ignored by git.
 
-- U.S. Census TIGER/Line ZCTA boundaries
-- U.S. Census CBSA boundaries
-- NCTCOG regional GIS and land-use layers
-- Dallas Central Appraisal District parcel shapefiles
-- TxDOT roadway layers
-- FEMA National Flood Hazard Layer
-- Texas school district boundaries
-- HUD Opportunity Zones
-- OpenStreetMap roads and amenities
-- Microsoft Global ML Building Footprints as an optional enrichment source
+## Tools Used
 
-No raw GIS data is committed to this repository.
+- Python
+- GeoPandas
+- Pandas
+- Shapely
+- PyProj
+- Pyogrio / Fiona-compatible vector IO
+- Folium / Leaflet
+- Matplotlib
+- QGIS-ready GeoPackage outputs
 
-## Planned Workflow
+## Project Structure
 
-1. Configure project paths and coordinate reference systems.
-2. Prepare raw source files into a consistent project structure.
-3. Clean and validate GIS layers.
-4. Build ZCTA-based real estate submarkets.
-5. Create reusable real estate analysis layers.
-6. Apply parcel and candidate-site screening rules.
-7. Score and rank qualified candidates.
-8. Export platform-ready GeoJSON, CSV, and GeoPackage deliverables.
-9. Build QGIS maps, atlas exports, and an interactive web map.
+```text
+data/raw/                 Local raw source files, ignored by git
+data/processed/           Intermediate generated files, ignored by git
+data/final/geojson/       Final GeoJSON outputs, ignored by git
+data/final/csv/           Final CSV outputs, ignored by git
+data/final/gpkg/          Final GeoPackage outputs, ignored by git
+docs/                     Methodology, sources, dictionary, case study
+outputs/maps/             Static PNG/PDF map exports, ignored by git
+outputs/tables/           Export summary tables, ignored by git
+outputs/webmap/           Interactive HTML map, ignored by git
+qgis/                     QGIS handoff notes
+scripts/                  Reproducible pipeline scripts
+```
 
-## CRS Strategy
+## Run Locally
 
-- `EPSG:4326` is the project CRS for platform GeoJSON exports and web mapping compatibility.
-- `EPSG:32138` is the analysis CRS for DFW distance and area calculations.
+Create an environment and install dependencies:
 
-All distance, buffer, and area calculations should be performed in `EPSG:32138`. Final platform exports should be transformed back to `EPSG:4326`.
+```bash
+cd /Users/berk/Projects/texas-real-estate-gis-pipeline
+python3 -m pip install -r requirements.txt
+```
 
-## Expected Deliverables
+Run the pipeline scripts in order:
 
-Expected project deliverables include:
+```bash
+python3 scripts/00_config.py
+python3 scripts/01_prepare_sources.py
+python3 scripts/03_build_zcta_submarkets.py
+python3 scripts/02_clean_validate_layers.py
+python3 scripts/04_build_real_estate_layers.py
+python3 scripts/05_parcel_screening_rules.py
+python3 scripts/06_score_rank_candidates.py
+python3 scripts/07_export_platform_geojson.py
+python3 scripts/08_create_interactive_webmap.py
+python3 scripts/09_create_static_map_exports.py
+python3 scripts/10_repository_qa.py
+```
 
-- Cleaned GIS layers for submarkets, parcels, constraints, and amenities
-- Ranked candidate-site tables
-- Platform-ready GeoJSON exports
-- CSV exports for business review
-- GeoPackage exports for desktop GIS workflows
-- QGIS map layouts and atlas exports
-- Static PNG/PDF maps
-- Interactive web map output
-- Portfolio case study and methodology documentation
+## Milestone Summary
+
+- Milestone 1: project skeleton
+- Milestone 2: source documentation and download plan
+- Milestone 3: Census DFW / Dallas study area setup
+- Milestone 4: ZCTA-based submarket proxy builder
+- Milestone 5: reusable GIS cleaning and validation factory
+- Milestone 6/6B: platform-ready real estate layer catalog with context layers
+- Milestone 7: candidate-site screening foundation and audit trail
+- Milestone 8: weighted candidate scoring and ranking
+- Milestone 9: platform-ready GeoJSON export package
+- Milestone 10: interactive Folium web map
+- Milestone 11: static portfolio map exports
+- Milestone 12: portfolio case study and repository QA
 
 ## Documentation
 
@@ -76,10 +114,23 @@ Expected project deliverables include:
 - [Data dictionary](docs/data_dictionary.md)
 - [Portfolio case study](docs/portfolio_case_study.md)
 
+## Portfolio Deliverables
+
+- `data/final/geojson/platform_export/`
+- `data/final/gpkg/export_ready_layers.gpkg`
+- `data/final/gpkg/ranked_candidate_sites.gpkg`
+- `data/final/csv/disqualification_audit.csv`
+- `data/final/csv/ranked_site_candidates.csv`
+- `outputs/webmap/texas_real_estate_sourcing_webmap.html`
+- `outputs/maps/png/`
+- `outputs/maps/pdf/`
+
 ## Current Status
 
-Milestone 11 in progress: static portfolio map export package added.
+Milestone 12 in progress: portfolio case study and repository QA added.
 
 ## Limitations
 
-This repository does not commit raw GIS data, processed GIS data, final generated datasets, exported maps, or web map outputs. Source datasets must be downloaded separately according to their respective licenses and usage terms.
+No official parcel ownership or legal parcel boundary data is used yet. Candidate polygons are analyst-defined grid proxies, not official parcels. Scores are transparent proxy rankings for portfolio demonstration, not legal development feasibility, valuation, underwriting, engineering, or zoning determinations.
+
+School district context is neutral context only. Opportunity Zones are policy/incentive context only. This project does not use demographic targeting language or protected-class logic.

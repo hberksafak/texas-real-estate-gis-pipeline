@@ -12,6 +12,7 @@ Recommended source packages:
 
 - `data/final/gpkg/export_ready_layers.gpkg`
 - `data/final/gpkg/ranked_candidate_sites.gpkg`
+- `data/final/gpkg/parcel_screening_foundation.gpkg`
 - `outputs/maps/png/`
 - `outputs/maps/pdf/`
 
@@ -24,5 +25,14 @@ Suggested layer styling:
 - School district context: thin teal or gray outlines, neutral context only.
 - Ranked candidates: light orange/yellow fill or graduated color by `final_site_score`.
 - Top 25 candidates: saturated orange fill with dark outline and optional rank labels.
+
+Generated static map exports:
+
+- `outputs/maps/png/dfw_study_area_overview.png`
+- `outputs/maps/pdf/dfw_study_area_overview.pdf`
+- `outputs/maps/png/dallas_candidate_screening_map.png`
+- `outputs/maps/pdf/dallas_candidate_screening_map.pdf`
+- `outputs/maps/png/top_25_candidate_sites_map.png`
+- `outputs/maps/pdf/top_25_candidate_sites_map.pdf`
 
 Candidate polygons are analyst-defined grid proxies, not official parcels. School districts should remain neutral context overlays only. Opportunity Zones should remain policy/incentive context only.

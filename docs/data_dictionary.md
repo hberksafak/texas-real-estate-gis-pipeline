@@ -188,3 +188,15 @@ Fields written to `outputs/tables/static_map_export_summary.csv`.
 | `output_purpose` | Portfolio or case-study use for the map. |
 | `status` | Export status for the map. |
 | `notes` | Map-level limitations and source notes. |
+
+## Repository QA Report
+
+Fields written to `outputs/tables/repository_qa_report.csv`.
+
+| Field | Description |
+|---|---|
+| `check_name` | Human-readable QA check name. |
+| `path` | File path checked by the QA script. |
+| `exists` | Boolean flag indicating whether the path exists locally. |
+| `status` | Check result, such as `passed` or `failed`. |
+| `notes` | Notes explaining whether the file is tracked documentation, a script, or an ignored generated output. |
