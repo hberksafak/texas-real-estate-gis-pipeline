@@ -268,36 +268,140 @@ def plot_candidate_screening(layers: dict[str, gpd.GeoDataFrame], png_path: Path
 
 def plot_top_25(layers: dict[str, gpd.GeoDataFrame], png_path: Path, pdf_path: Path) -> None:
     """Create top 25 candidate close-up map."""
+    top_25 = layers["top_25_candidate_sites"].copy()
+    ranked_context = layers["ranked_site_candidates"].copy()
+    submarket_context = layers["dfw_zcta_submarkets"].copy()
+
+    minx, miny, maxx, maxy = top_25.total_bounds
+    width = max(maxx - minx, 1_000)
+    height = max(maxy - miny, 1_000)
+    pad_x = max(width * 0.12, 1_500)
+    pad_y = max(height * 0.12, 1_500)
+    xmin, xmax = minx - pad_x, maxx + pad_x
+    ymin, ymax = miny - pad_y, maxy + pad_y
+
+    target_aspect = 12 / 9
+    extent_width = xmax - xmin
+    extent_height = ymax - ymin
+    extent_aspect = extent_width / extent_height
+    center_x = (xmin + xmax) / 2
+    center_y = (ymin + ymax) / 2
+    if extent_aspect > target_aspect:
+        extent_height = extent_width / target_aspect
+        ymin = center_y - extent_height / 2
+        ymax = center_y + extent_height / 2
+    else:
+        extent_width = extent_height * target_aspect
+        xmin = center_x - extent_width / 2
+        xmax = center_x + extent_width / 2
+
+    ranked_context = ranked_context.cx[xmin:xmax, ymin:ymax]
+    submarket_context = submarket_context.cx[xmin:xmax, ymin:ymax]
+
     fig, ax = plt.subplots(figsize=(12, 9))
     ax.set_facecolor("#f8fafc")
 
-    layers["dfw_zcta_submarkets"].plot(ax=ax, color="#e5e7eb", edgecolor="#cbd5e1", linewidth=0.35, alpha=0.55)
-    layers["ranked_site_candidates"].plot(ax=ax, color="#fed7aa", edgecolor="none", alpha=0.18)
-    layers["top_25_candidate_sites"].plot(
+    submarket_context.plot(ax=ax, color="#f1f5f9", edgecolor="#cbd5e1", linewidth=0.35, alpha=0.62)
+    ranked_context.plot(ax=ax, color="#94a3b8", edgecolor="none", alpha=0.16)
+    top_25.plot(
         ax=ax,
-        column="final_site_score",
-        cmap="Oranges",
+        color="#f97316",
         edgecolor="#7c2d12",
-        linewidth=1.2,
-        alpha=0.86,
-        legend=True,
-        legend_kwds={"label": "Top 25 proxy score", "shrink": 0.58},
+        linewidth=1.55,
+        alpha=0.9,
+        zorder=5,
     )
-    layers["dallas_county_boundary"].plot(ax=ax, color="none", edgecolor="#111827", linewidth=1.8)
+    layers["dallas_county_boundary"].plot(ax=ax, color="none", edgecolor="#334155", linewidth=1.35, zorder=6)
 
-    label_layer = layers["top_25_candidate_sites"].sort_values("candidate_rank").head(12)
-    for _, row in label_layer.iterrows():
-        point = row.geometry.representative_point()
-        ax.text(point.x, point.y, str(int(row["candidate_rank"])), fontsize=7.5, fontweight="bold", color="#111827", ha="center", va="center")
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
 
-    set_extent(ax, layers["top_25_candidate_sites"], pad_ratio=0.20)
-    handles = [
-        Patch(facecolor="#e5e7eb", edgecolor="#cbd5e1", alpha=0.55, label="Submarket context"),
-        Patch(facecolor="#fed7aa", edgecolor="none", alpha=0.3, label="Ranked candidates"),
-        Patch(facecolor="#fb923c", edgecolor="#7c2d12", alpha=0.86, label="Top 25 candidates"),
-        Patch(facecolor="none", edgecolor="#111827", label="Dallas County boundary"),
+    label_layer = top_25.sort_values("candidate_rank").head(10)
+    label_offset = min(max(max(extent_width, extent_height) * 0.032, 700), 2_600)
+    label_offsets = [
+        (1.0, 1.0),
+        (1.2, -1.0),
+        (-1.0, 1.1),
+        (-1.2, -1.0),
+        (1.7, 0.2),
+        (-1.7, 0.2),
+        (0.2, 1.7),
+        (0.2, -1.7),
+        (1.55, 1.15),
+        (-1.55, -1.15),
+        (2.1, 0.95),
+        (-2.1, 0.95),
+        (2.1, -0.95),
+        (-2.1, -0.95),
+        (0.95, 2.1),
+        (-0.95, 2.1),
+        (0.95, -2.1),
+        (-0.95, -2.1),
     ]
-    ax.legend(handles=handles, loc="lower right", frameon=True, framealpha=0.94, fontsize=8)
+    label_margin_x = extent_width * 0.035
+    label_margin_y = extent_height * 0.04
+    min_label_dx = extent_width * 0.026
+    min_label_dy = extent_height * 0.036
+    placed_labels: list[tuple[float, float]] = []
+
+    for label_index, (_, row) in enumerate(label_layer.iterrows()):
+        point = row.geometry.representative_point()
+        offset_candidates = label_offsets[label_index:] + label_offsets[:label_index]
+        candidate_positions = []
+        for dx_factor, dy_factor in offset_candidates:
+            label_x = min(
+                max(point.x + dx_factor * label_offset, xmin + label_margin_x),
+                xmax - label_margin_x,
+            )
+            label_y = min(
+                max(point.y + dy_factor * label_offset, ymin + label_margin_y),
+                ymax - label_margin_y,
+            )
+            overlap_score = sum(
+                max(0, min_label_dx - abs(label_x - placed_x))
+                + max(0, min_label_dy - abs(label_y - placed_y))
+                for placed_x, placed_y in placed_labels
+            )
+            candidate_positions.append((overlap_score, label_x, label_y))
+            if overlap_score == 0:
+                break
+        _, label_x, label_y = min(candidate_positions, key=lambda item: item[0])
+        placed_labels.append((label_x, label_y))
+        ax.annotate(
+            str(int(row["candidate_rank"])),
+            xy=(point.x, point.y),
+            xytext=(label_x, label_y),
+            fontsize=8,
+            fontweight="bold",
+            color="#111827",
+            ha="center",
+            va="center",
+            bbox={
+                "boxstyle": "round,pad=0.22",
+                "facecolor": "white",
+                "edgecolor": "#cbd5e1",
+                "alpha": 0.96,
+            },
+            arrowprops={"arrowstyle": "-", "color": "#475569", "linewidth": 0.55, "alpha": 0.75},
+            zorder=8,
+        )
+
+    handles = [
+        Patch(facecolor="#f1f5f9", edgecolor="#cbd5e1", alpha=0.62, label="Submarket context"),
+        Patch(facecolor="#94a3b8", edgecolor="none", alpha=0.24, label="Ranked candidate context"),
+        Patch(facecolor="#f97316", edgecolor="#7c2d12", alpha=0.9, label="Top 25 candidates"),
+        Patch(facecolor="white", edgecolor="#cbd5e1", label="Rank labels 1-10"),
+        Patch(facecolor="none", edgecolor="#334155", label="Dallas County boundary"),
+    ]
+    ax.legend(
+        handles=handles,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 0.985),
+        ncol=2,
+        frameon=True,
+        framealpha=0.95,
+        fontsize=8,
+    )
     finalize_map(fig, ax, MAP_OUTPUTS["top_25_candidate_sites_map"]["title"], png_path, pdf_path)
 
 
