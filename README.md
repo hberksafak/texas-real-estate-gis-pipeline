@@ -78,7 +78,7 @@ Expected project deliverables include:
 
 ## Current Status
 
-Milestone 6B complete: platform-ready layer catalog now includes Opportunity Zones and school district context layers.
+Milestone 7 in progress: candidate-site screening foundation refined with edge-fragment QA rule.
 
 ## Limitations
 

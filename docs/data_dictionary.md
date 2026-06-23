@@ -25,6 +25,22 @@ Draft planned fields for future pipeline outputs. Field names may change after r
 | Field | Description |
 |---|---|
 | `candidate_id` | Stable identifier for each candidate site. |
+| `candidate_source` | Source classification for the candidate geometry. Current proxy value: `analyst_defined_grid_proxy`. |
+| `is_official_parcel` | Boolean flag indicating whether the candidate is an official parcel. Current proxy value is `False`. |
+| `area_sq_m` | Candidate polygon area in square meters, calculated in `EPSG:32138`. |
+| `full_grid_area_sq_m` | Full unclipped grid-cell area in square meters. With the current 1,000m grid this is `1000000`. |
+| `area_ratio_to_full_grid` | Candidate area divided by the full grid-cell area, used to identify clipped boundary fragments. |
+| `area_acres` | Candidate polygon area in acres, calculated from `area_sq_m`. |
+| `qualified` | Boolean result of the initial proxy screening rules. |
+| `failed_rule_count` | Count of failed screening rules for the candidate. |
+| `failed_rules` | Semicolon-delimited rule names failed by the candidate. |
+| `primary_disqualification_reason` | First failed rule, used as the primary audit reason. |
+| `screening_stage` | Screening stage label, such as `passed_initial_proxy_screening` or `failed_initial_proxy_screening`. |
+| `rule_edge_fragment` | Screening rule requiring candidates to retain at least 60% of a full 1,000m grid cell after clipping to Dallas County. |
+| `edge_fragment_candidate_count` | Summary count of candidates disqualified or flagged by the edge-fragment area-ratio rule. |
+| `opportunity_zone_context` | Boolean flag indicating whether the candidate overlaps an Opportunity Zone. Incentive context only. |
+| `school_district_context` | Boolean flag indicating whether school district context was assigned. Neutral context only. |
+| `school_district_name` | School district name or fallback identifier assigned by largest overlap. |
 | `parcel_id` | Source parcel identifier where available. |
 | `site_name` | Optional display name for the candidate. |
 | `county_name` | County name. |

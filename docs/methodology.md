@@ -48,6 +48,18 @@ HUD Opportunity Zones are included only as policy and incentive context for busi
 
 Apply transparent screening rules to identify candidate parcels or sites. Planned rules may include parcel size, location, zoning or land-use context, access, flood exposure, and exclusion constraints.
 
+### Candidate Site Screening Foundation
+
+Official parcel data is not used yet. Until Dallas CAD parcel geometry is acquired and validated, the project uses analyst-defined grid proxy polygons clipped to Dallas County as a documented candidate-site screening base. These proxy polygons are not official parcels and are labeled with `candidate_source = analyst_defined_grid_proxy` and `is_official_parcel = False`.
+
+This proxy approach is useful for developing the screening workflow before parcel acquisition because it lets the project test geometry handling, area thresholds, submarket assignment, context overlays, output schemas, and audit tables against real geography without inventing parcel ownership or legal parcel boundaries.
+
+Initial screening rules validate geometry, minimum and maximum candidate area, boundary-edge grid fragmentation, and submarket assignment. Boundary-edge fragments are disqualified when a clipped grid cell retains less than 60% of the full 1,000m grid cell area because these partial proxy cells are less reliable for candidate screening than complete interior cells. Each candidate receives a disqualification audit trail with failed rule counts, semicolon-delimited failed rule names, a primary disqualification reason, and a screening stage.
+
+School district context is included only as a neutral education context overlay. It is not a qualification rule, ranking criterion, demographic targeting input, or fair-housing-risk targeting input.
+
+Opportunity Zones are included only as policy and incentive context. Opportunity Zone overlap is not a qualification rule and is not used for demographic targeting.
+
 ## 6. Disqualification Audit Trail
 
 Maintain explicit audit fields for each disqualification rule so rejected parcels can be reviewed and explained rather than silently removed.

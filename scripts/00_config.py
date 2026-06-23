@@ -40,6 +40,12 @@ DFW_OPPORTUNITY_ZONES_GEOJSON = FINAL_GEOJSON_DIR / "dfw_opportunity_zones.geojs
 DFW_SCHOOL_DISTRICTS_GEOJSON = FINAL_GEOJSON_DIR / "dfw_school_districts.geojson"
 REAL_ESTATE_LAYER_CATALOG_CSV = FINAL_CSV_DIR / "real_estate_layer_catalog.csv"
 REAL_ESTATE_LAYER_CATALOG_GPKG = FINAL_GPKG_DIR / "real_estate_layer_catalog.gpkg"
+PARCEL_SCREENING_CANDIDATES_GEOJSON = FINAL_GEOJSON_DIR / "parcel_screening_candidates.geojson"
+QUALIFIED_CANDIDATES_GEOJSON = FINAL_GEOJSON_DIR / "qualified_candidate_sites.geojson"
+DISQUALIFIED_CANDIDATES_GEOJSON = FINAL_GEOJSON_DIR / "disqualified_candidate_sites.geojson"
+DISQUALIFICATION_AUDIT_CSV = FINAL_CSV_DIR / "disqualification_audit.csv"
+CANDIDATE_SUMMARY_CSV = FINAL_CSV_DIR / "candidate_summary.csv"
+PARCEL_SCREENING_GPKG = FINAL_GPKG_DIR / "parcel_screening_foundation.gpkg"
 
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 MAPS_DIR = OUTPUTS_DIR / "maps"
