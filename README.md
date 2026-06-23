@@ -78,7 +78,7 @@ Expected project deliverables include:
 
 ## Current Status
 
-Project skeleton initialized; data source verification in progress.
+Milestone 3 in progress: Census boundary workflow added for DFW / Dallas study area setup.
 
 ## Limitations
 

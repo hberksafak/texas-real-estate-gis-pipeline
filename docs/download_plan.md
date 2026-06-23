@@ -93,3 +93,10 @@ The next milestone should download and stage only the minimum boundary data need
 3. Census TIGER/Line 2025 ZCTA boundaries if appropriate for the submarket workflow
 
 The first real-data milestone should then create documented local source folders and verify CRS, schema, and basic geometry availability before any screening or scoring logic is implemented.
+
+## Milestone 3 Execution Notes
+
+- Census boundary workflow is the first real-data milestone.
+- Raw Census ZIPs are stored locally under `data/raw/census_tiger_2025/`.
+- Final study area outputs are stored locally under `data/final/`.
+- Raw and generated outputs are intentionally not committed to git.
