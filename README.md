@@ -68,9 +68,17 @@ Expected project deliverables include:
 - Interactive web map output
 - Portfolio case study and methodology documentation
 
+## Documentation
+
+- [Data sources](docs/data_sources.md)
+- [Download plan](docs/download_plan.md)
+- [Methodology](docs/methodology.md)
+- [Data dictionary](docs/data_dictionary.md)
+- [Portfolio case study](docs/portfolio_case_study.md)
+
 ## Current Status
 
-Project skeleton initialized.
+Project skeleton initialized; data source verification in progress.
 
 ## Limitations
 
