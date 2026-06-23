@@ -1,0 +1,12 @@
+geopandas
+pandas
+shapely
+pyproj
+pyogrio
+fiona
+folium
+mapclassify
+osmnx
+requests
+python-dotenv
+tqdm

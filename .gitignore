@@ -1,0 +1,59 @@
+# Raw and generated data
+data/raw/*
+!data/raw/README.md
+data/processed/*
+!data/processed/README.md
+data/final/geojson/*
+!data/final/geojson/.gitkeep
+data/final/csv/*
+!data/final/csv/.gitkeep
+data/final/gpkg/*
+!data/final/gpkg/.gitkeep
+
+# Generated outputs
+outputs/maps/png/*
+!outputs/maps/png/.gitkeep
+outputs/maps/pdf/*
+!outputs/maps/pdf/.gitkeep
+outputs/report/*
+!outputs/report/.gitkeep
+outputs/webmap/*
+!outputs/webmap/.gitkeep
+outputs/tables/*
+!outputs/tables/.gitkeep
+
+# Python environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+build/
+dist/
+*.egg-info/
+
+# Local environment files
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# QGIS temporary and backup files
+*.qgs~
+*.qgz~
+*.qgd
+*.qgd~
+*.qml~
+*.bak
+*.tmp
+*.autosave
