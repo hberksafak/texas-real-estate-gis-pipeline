@@ -23,6 +23,7 @@ Suggested layer styling:
 - ZCTA submarkets: muted categorical fills with light blue outlines.
 - Opportunity Zones: purple transparent fill, optional by default.
 - School district context: thin teal or gray outlines, neutral context only.
+- Dallas waterbodies: muted blue fill, used as a screening QA constraint layer.
 - Ranked candidates: light orange/yellow fill or graduated color by `final_site_score`.
 - Top 25 candidates: saturated orange fill with dark outline and optional rank labels.
 
@@ -35,4 +36,6 @@ Generated static map exports:
 - `outputs/maps/png/top_25_candidate_sites_map.png`
 - `outputs/maps/pdf/top_25_candidate_sites_map.pdf`
 
-Candidate polygons are analyst-defined grid proxies, not official parcels. School districts should remain neutral context overlays only. Opportunity Zones should remain policy/incentive context only.
+Candidate polygons are analyst-defined grid proxies, not official parcels. Waterbody exclusion is a screening QA rule, not parcel-level due diligence. School districts should remain neutral context overlays only. Opportunity Zones should remain policy/incentive context only.
+
+Before acquisition analysis, validate candidates against official parcel records, zoning, ownership, floodplain, utilities, road access, and legal due diligence sources. Basemaps are for visual context only and should not be treated as analysis data.

@@ -32,6 +32,7 @@ EXPORT_LAYER_SPECS = [
     ("dfw_zcta_submarkets", "submarket", "DFW_SUBMARKETS_GEOJSON"),
     ("dfw_opportunity_zones", "incentive_context", "DFW_OPPORTUNITY_ZONES_GEOJSON"),
     ("dfw_school_districts", "education_context", "DFW_SCHOOL_DISTRICTS_GEOJSON"),
+    ("dallas_waterbodies", "screening_constraint", "DALLAS_WATERBODIES_GEOJSON"),
     (
         "parcel_screening_candidates",
         "candidate_screening",

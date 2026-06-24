@@ -24,7 +24,7 @@ This project builds the foundation for those answers in DFW / Dallas County.
 
 Primary and staged sources include:
 
-- U.S. Census TIGER/Line 2025 county, CBSA, ZCTA, and Texas Unified School District boundaries
+- U.S. Census TIGER/Line 2025 county, CBSA, ZCTA, Dallas County Area Water, and Texas Unified School District boundaries
 - HUD Opportunity Zones
 - Analyst-defined ZCTA sector proxy submarkets
 - Analyst-defined candidate-site grid proxy polygons
@@ -53,28 +53,31 @@ Official Dallas CAD parcel data is not used yet. Instead, the project creates an
 - `candidate_source = analyst_defined_grid_proxy`
 - `is_official_parcel = False`
 
-Initial screening rules check geometry validity, area range, edge-fragment reliability, and submarket assignment. Boundary-edge grid fragments below the configured retained-area threshold are disqualified because they are partial clipped proxy cells and less reliable for candidate screening.
+Initial screening rules check geometry validity, area range, edge-fragment reliability, waterbody overlap, and submarket assignment. Boundary-edge grid fragments below the configured retained-area threshold are disqualified because they are partial clipped proxy cells and less reliable for candidate screening.
+
+Waterbody exclusion is a screening QA rule based on Census TIGER/Line 2025 Dallas County Area Water. Candidate proxy cells are disqualified when their centroid falls inside a mapped waterbody or when the waterbody overlap ratio is at least 10%. Basemap tiles are used only for visualization and are not analysis inputs.
 
 Each candidate receives an audit trail with qualification status, failed rule count, failed rule names, primary disqualification reason, and screening stage.
 
 ## Weighted Scoring Model
 
-Qualified proxy candidates are ranked with `v1_proxy_candidate_scoring`, a transparent portfolio demonstration model.
+Qualified proxy candidates are ranked with `v2_professional_proxy_screening_limited`, a transparent professional proxy screening model.
 
 The weighted score includes:
 
-- 25% size suitability
-- 20% grid completeness / shape reliability
-- 20% neutral submarket candidate-supply context
-- 15% Opportunity Zone incentive context
-- 10% school district context completeness
-- 10% geometry reliability
+- 30% developable geometry score
+- 25% constraint avoidance score
+- 25% neutral spatial context score
+- 15% neutral submarket context score
+- 5% Opportunity Zone incentive context
 
 Scores are proxy rankings for portfolio demonstration. They are not legal parcel valuation, development feasibility, entitlement, appraisal, engineering, or underwriting determinations.
 
-School district context rewards only whether a clean district assignment exists. It does not use school ratings, school quality, demographics, income, race, ethnicity, protected-class variables, or fair-housing-risk variables.
+School district context is retained as metadata only and is not used as a ranking criterion. The model does not use school ratings, school quality, demographics, income, race, ethnicity, protected-class variables, or fair-housing-risk variables.
 
 Opportunity Zones are policy/incentive context only and are not demographic targeting.
+
+Road accessibility, FEMA flood, and NCTCOG land-use suitability are documented as not implemented because those source layers are not staged in the current local workflow. The model does not give candidates default points for missing data.
 
 ## Deliverables
 
@@ -109,7 +112,7 @@ Scores are proxy rankings for portfolio demonstration, not legal development fea
 
 School district context is neutral context only. Opportunity Zones are policy/incentive context only. The project does not use demographic targeting language or protected-class logic.
 
-Additional due diligence would be required before real acquisition work, including parcel records, zoning, flood, road access, utilities, title, environmental, entitlement, market, and underwriting review.
+Additional due diligence would be required before real acquisition work, including official parcel records, zoning, ownership, floodplain, utilities, official road access, title, environmental, entitlement, market, and underwriting review.
 
 ## What This Demonstrates For GIS / Real Estate Clients
 

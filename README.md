@@ -20,8 +20,8 @@ The pipeline:
 4. Validates and catalogs project GIS layers.
 5. Adds Opportunity Zone and school district context layers.
 6. Creates analyst-defined candidate-site grid proxy polygons.
-7. Applies transparent screening rules and disqualification audit logic.
-8. Scores and ranks qualified proxy candidates.
+7. Applies transparent screening rules, including waterbody exclusion QA, and disqualification audit logic.
+8. Scores and ranks qualified proxy candidates with the v2 professional proxy screening model.
 9. Exports platform-ready GeoJSON and GeoPackage packages.
 10. Builds an interactive web map and static PNG/PDF portfolio maps.
 
@@ -127,10 +127,12 @@ python3 scripts/10_repository_qa.py
 
 ## Current Status
 
-Milestone 12 in progress: portfolio case study and repository QA added.
+Frozen v2 scoring QA in progress: reproducibility and rank-stability audit outputs added for the professional proxy screening model.
 
 ## Limitations
 
-No official parcel ownership or legal parcel boundary data is used yet. Candidate polygons are analyst-defined grid proxies, not official parcels. Scores are transparent proxy rankings for portfolio demonstration, not legal development feasibility, valuation, underwriting, engineering, or zoning determinations.
+No official parcel ownership or legal parcel boundary data is used yet. Candidate polygons are analyst-defined grid proxies, not official parcels. Scores are transparent proxy rankings for portfolio demonstration, not legal development feasibility, valuation, underwriting, engineering, floodplain, utility, access, or zoning determinations.
+
+The current scoring model is `v2_professional_proxy_screening_limited`. Road accessibility, FEMA flood, and NCTCOG land-use suitability are not implemented because those source layers are not staged locally.
 
 School district context is neutral context only. Opportunity Zones are policy/incentive context only. This project does not use demographic targeting language or protected-class logic.

@@ -20,9 +20,14 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.lines import Line2D
-from matplotlib.patches import Patch
-from shapely.geometry import GeometryCollection, MultiPolygon, Polygon
+from matplotlib.patches import Patch, Rectangle
+from shapely.geometry import GeometryCollection, MultiPolygon, Polygon, box
 from shapely.geometry.base import BaseGeometry
+
+try:
+    import contextily as ctx
+except ImportError:
+    ctx = None
 
 
 MAP_NOTE = (
@@ -67,7 +72,7 @@ MAP_OUTPUTS = {
         ],
     },
     "top_25_candidate_sites_map": {
-        "title": "Top 25 Candidate Sites Close-Up",
+        "title": "Top 25 Ranked Candidate Sites",
         "png": "top_25_candidate_sites_map.png",
         "pdf": "top_25_candidate_sites_map.pdf",
         "purpose": "Close-up portfolio map of the top 25 ranked proxy candidate sites.",
@@ -210,6 +215,483 @@ def finalize_map(fig, ax, title: str, png_path: Path, pdf_path: Path) -> None:
     plt.close(fig)
 
 
+def extent_from_bounds(
+    bounds: tuple[float, float, float, float],
+    pad_ratio: float,
+    min_pad_m: float,
+    target_aspect: float,
+) -> tuple[float, float, float, float]:
+    """Build a padded extent with a fixed plotting aspect ratio."""
+    minx, miny, maxx, maxy = bounds
+    width = max(maxx - minx, 1_000)
+    height = max(maxy - miny, 1_000)
+    pad_x = max(width * pad_ratio, min_pad_m)
+    pad_y = max(height * pad_ratio, min_pad_m)
+    xmin, xmax = minx - pad_x, maxx + pad_x
+    ymin, ymax = miny - pad_y, maxy + pad_y
+
+    extent_width = xmax - xmin
+    extent_height = ymax - ymin
+    center_x = (xmin + xmax) / 2
+    center_y = (ymin + ymax) / 2
+    if extent_width / extent_height > target_aspect:
+        extent_height = extent_width / target_aspect
+        ymin = center_y - extent_height / 2
+        ymax = center_y + extent_height / 2
+    else:
+        extent_width = extent_height * target_aspect
+        xmin = center_x - extent_width / 2
+        xmax = center_x + extent_width / 2
+
+    return xmin, xmax, ymin, ymax
+
+
+def select_densest_top_candidate_cluster(
+    top_25: gpd.GeoDataFrame,
+    cluster_size: int = 10,
+) -> gpd.GeoDataFrame:
+    """Select the most compact cluster of Top 25 candidates for the close-up panel."""
+    cluster_size = min(len(top_25), cluster_size)
+    if cluster_size == len(top_25):
+        return top_25
+
+    points = top_25.geometry.representative_point()
+    best_indices = top_25.index
+    best_score: tuple[float, float, int] | None = None
+
+    for candidate_index, point in points.items():
+        distances = points.distance(point)
+        nearest_indices = distances.sort_values(kind="mergesort").head(cluster_size).index
+        cluster = top_25.loc[nearest_indices]
+        minx, miny, maxx, maxy = cluster.total_bounds
+        cluster_area = (maxx - minx) * (maxy - miny)
+        rank_value = int(pd.to_numeric(top_25.loc[candidate_index, "candidate_rank"], errors="coerce"))
+        score = (cluster_area, float(distances.loc[nearest_indices].sum()), rank_value)
+        if best_score is None or score < best_score:
+            best_score = score
+            best_indices = nearest_indices
+
+    return top_25.loc[best_indices].sort_values("candidate_rank")
+
+
+def choose_scale_bar_length_km(xmin: float, xmax: float) -> int:
+    """Choose a compact scale bar length for the current extent."""
+    target_km = ((xmax - xmin) / 1_000) * 0.22
+    previous_length_km = 1
+    for length_km in [1, 2, 5, 10, 20]:
+        if length_km > target_km:
+            return max(1, previous_length_km)
+        previous_length_km = length_km
+    return 20
+
+
+def add_compact_title_and_note(fig, title: str) -> None:
+    """Add a compact title block for the close-up portfolio map."""
+    generated_date = pd.Timestamp.today().strftime("%Y-%m-%d")
+    fig.suptitle(title, fontsize=17, fontweight="bold", x=0.04, ha="left", y=0.962)
+    fig.text(
+        0.04,
+        0.924,
+        "Texas Real Estate Sourcing GIS Pipeline & Parcel Screening System",
+        fontsize=9.5,
+        color="#334155",
+        ha="left",
+    )
+    fig.text(
+        0.04,
+        0.041,
+        "Candidate polygons are analyst-defined proxies, not official parcels. "
+        "Scores are for portfolio demonstration only.",
+        fontsize=7.8,
+        color="#475569",
+        ha="left",
+    )
+    fig.text(
+        0.04,
+        0.024,
+        "Basemap: OpenStreetMap / Contextily. Boundary and candidate layers: project screening dataset. "
+        f"Generated: {generated_date}.",
+        fontsize=5.9,
+        color="#64748b",
+        ha="left",
+    )
+    fig.text(
+        0.04,
+        0.011,
+        "Validate against official parcel records, zoning, ownership, floodplain, utilities, and access constraints before acquisition analysis.",
+        fontsize=5.9,
+        color="#64748b",
+        ha="left",
+    )
+
+
+def add_compact_scale_bar(ax, length_km: int) -> None:
+    """Add a smaller scale bar for the close-up map."""
+    x_min, x_max = ax.get_xlim()
+    y_min, y_max = ax.get_ylim()
+    x = x_min + (x_max - x_min) * 0.055
+    y = y_min + (y_max - y_min) * 0.065
+    length_m = length_km * 1_000
+    ax.plot([x, x + length_m], [y, y], color="#111827", linewidth=2.2, solid_capstyle="butt")
+    ax.text(
+        x + length_m / 2,
+        y + (y_max - y_min) * 0.017,
+        f"{length_km} km",
+        ha="center",
+        va="bottom",
+        fontsize=7,
+        color="#111827",
+    )
+
+
+def add_compact_north_arrow(ax) -> None:
+    """Add a smaller north arrow for the close-up map."""
+    ax.annotate(
+        "N",
+        xy=(0.955, 0.875),
+        xytext=(0.955, 0.805),
+        xycoords="axes fraction",
+        arrowprops={"facecolor": "#111827", "edgecolor": "#111827", "width": 1.9, "headwidth": 6},
+        ha="center",
+        va="center",
+        fontsize=7.4,
+        fontweight="bold",
+        color="#111827",
+    )
+
+
+def add_light_basemap(
+    ax,
+    zoom: int,
+    panel_name: str,
+    alpha: float = 0.56,
+    zoom_adjust: int = 0,
+) -> bool:
+    """Add a light CartoDB/OSM basemap for Top 25 static-map panels."""
+    if ctx is None:
+        if not getattr(add_light_basemap, "_missing_contextily_warning_printed", False):
+            print("Warning: contextily is not installed; Top 25 basemap skipped.")
+            add_light_basemap._missing_contextily_warning_printed = True
+        return False
+
+    try:
+        source = ctx.providers.CartoDB.Positron
+        ctx.add_basemap(
+            ax,
+            crs=config.ANALYSIS_CRS,
+            source=source,
+            zoom=zoom,
+            zoom_adjust=zoom_adjust,
+            reset_extent=True,
+            attribution=False,
+            alpha=alpha,
+            interpolation="bilinear",
+            zorder=0,
+        )
+        return True
+    except Exception as exc:
+        print(f"Warning: Top 25 basemap unavailable for {panel_name}: {exc}")
+        return False
+
+
+def create_centroid_points_for_labeling(top_25: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """Create display-only centroid points from Top 25 candidate footprints."""
+    points = top_25.copy()
+    points["candidate_rank_numeric"] = pd.to_numeric(points["candidate_rank"], errors="coerce")
+    points["final_site_score_numeric"] = pd.to_numeric(points["final_site_score"], errors="coerce")
+    points["point_size"] = points["candidate_rank_numeric"].apply(
+        lambda rank: 96 if rank <= 5 else 68 if rank <= 10 else 48
+    )
+    return gpd.GeoDataFrame(points, geometry=top_25.geometry.representative_point(), crs=top_25.crs)
+
+
+def calculate_balanced_extent(top_25: gpd.GeoDataFrame) -> tuple[float, float, float, float]:
+    """Calculate a balanced main-panel extent that keeps all Top 25 sites visible."""
+    return extent_from_bounds(
+        tuple(top_25.total_bounds),
+        pad_ratio=0.035,
+        min_pad_m=1_650,
+        target_aspect=1.52,
+    )
+
+
+def add_top_5_rank_labels(
+    ax,
+    centroid_points: gpd.GeoDataFrame,
+    extent: tuple[float, float, float, float],
+) -> None:
+    """Label visible Top 5 centroid points with deterministic offsets."""
+    xmin, xmax, ymin, ymax = extent
+    extent_width = xmax - xmin
+    extent_height = ymax - ymin
+    visible_area = box(xmin, ymin, xmax, ymax)
+    label_layer = centroid_points[
+        (centroid_points["candidate_rank_numeric"] <= 5) & centroid_points.intersects(visible_area)
+    ].sort_values("candidate_rank_numeric")
+
+    label_offset = max(min(max(extent_width, extent_height) * 0.032, 1_450), 800)
+    label_margin_x = extent_width * 0.022
+    label_margin_y = extent_height * 0.035
+    rank_offsets = {
+        1: [(1.0, 0.7), (0.65, 1.0), (1.25, 0.3)],
+        2: [(0.95, -0.25), (1.05, 0.55), (0.35, -0.75)],
+        3: [(-1.05, 1.05), (-1.35, 0.55), (-0.8, 1.45)],
+        4: [(-1.35, -1.25), (-1.65, 0.15), (-0.55, -1.65)],
+        5: [(1.35, -1.25), (1.65, 0.15), (0.55, -1.65)],
+    }
+    fallback_offsets = [(1.1, 0.9), (-1.1, 0.9), (1.1, -0.9), (-1.1, -0.9), (0.0, 1.45)]
+    placed_labels: list[tuple[float, float]] = []
+
+    for label_index, (_, row) in enumerate(label_layer.iterrows()):
+        point = row.geometry
+        rank = int(row["candidate_rank_numeric"])
+        offset_candidates = rank_offsets.get(rank, fallback_offsets[label_index:] + fallback_offsets[:label_index])
+        candidate_positions = []
+        for dx_factor, dy_factor in offset_candidates:
+            label_x = min(max(point.x + dx_factor * label_offset, xmin + label_margin_x), xmax - label_margin_x)
+            label_y = min(max(point.y + dy_factor * label_offset, ymin + label_margin_y), ymax - label_margin_y)
+            overlap_score = sum(
+                max(0, extent_width * 0.04 - abs(label_x - placed_x))
+                + max(0, extent_height * 0.06 - abs(label_y - placed_y))
+                for placed_x, placed_y in placed_labels
+            )
+            candidate_positions.append((overlap_score, label_x, label_y))
+            if overlap_score == 0:
+                break
+        _, label_x, label_y = min(candidate_positions, key=lambda item: item[0])
+        placed_labels.append((label_x, label_y))
+        ax.annotate(
+            f"#{rank}",
+            xy=(point.x, point.y),
+            xytext=(label_x, label_y),
+            fontsize=7.4,
+            fontweight="bold",
+            color="#111827",
+            ha="center",
+            va="center",
+            bbox={
+                "boxstyle": "round,pad=0.2",
+                "facecolor": "white",
+                "edgecolor": "#cbd5e1",
+                "alpha": 0.98,
+            },
+            arrowprops={"arrowstyle": "-", "color": "#64748b", "linewidth": 0.5, "alpha": 0.72},
+            zorder=9,
+        )
+
+
+def add_cluster_inset(
+    inset_ax,
+    layers: dict[str, gpd.GeoDataFrame],
+    top_25: gpd.GeoDataFrame,
+    centroid_points: gpd.GeoDataFrame,
+) -> bool:
+    """Add a Dallas County context inset highlighting the primary Top 25 cluster."""
+    dense_cluster = select_densest_top_candidate_cluster(top_25, cluster_size=15)
+    cluster_xmin, cluster_xmax, cluster_ymin, cluster_ymax = extent_from_bounds(
+        tuple(dense_cluster.total_bounds),
+        pad_ratio=0.25,
+        min_pad_m=1_400,
+        target_aspect=1.18,
+    )
+
+    inset_ax.set_facecolor("white")
+    set_extent(inset_ax, layers["dallas_county_boundary"], pad_ratio=0.16)
+    basemap_used = add_light_basemap(
+        inset_ax,
+        zoom=10,
+        panel_name="primary cluster inset",
+        alpha=0.54,
+        zoom_adjust=0,
+    )
+    layers["dallas_county_boundary"].plot(
+        ax=inset_ax,
+        color="none",
+        edgecolor="#475569",
+        linewidth=0.58,
+        alpha=0.86,
+        zorder=2,
+    )
+    centroid_points.plot(
+        ax=inset_ax,
+        color="#f97316",
+        edgecolor="#7c2d12",
+        markersize=16,
+        linewidth=0.45,
+        alpha=0.96,
+        zorder=3,
+    )
+    inset_ax.add_patch(
+        Rectangle(
+            (cluster_xmin, cluster_ymin),
+            cluster_xmax - cluster_xmin,
+            cluster_ymax - cluster_ymin,
+            facecolor="none",
+            edgecolor="#2563eb",
+            linewidth=1.0,
+            zorder=4,
+        )
+    )
+    inset_ax.set_axis_off()
+    inset_ax.text(
+        0.04,
+        0.88,
+        "Primary Cluster (Context)",
+        transform=inset_ax.transAxes,
+        fontsize=7,
+        fontweight="bold",
+        color="#334155",
+        ha="left",
+        va="top",
+        bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.85, "pad": 1.6},
+    )
+    for spine in inset_ax.spines.values():
+        spine.set_visible(True)
+        spine.set_edgecolor("#cbd5e1")
+        spine.set_linewidth(0.8)
+    return basemap_used
+
+
+def add_rank_callout_table(table_ax, centroid_points: gpd.GeoDataFrame) -> None:
+    """Add a compact Top 10 ranked candidate callout table."""
+    table_ax.set_facecolor("white")
+    table_ax.set_xticks([])
+    table_ax.set_yticks([])
+    for spine in table_ax.spines.values():
+        spine.set_visible(True)
+        spine.set_edgecolor("#cbd5e1")
+        spine.set_linewidth(0.8)
+
+    top_10 = centroid_points.sort_values("candidate_rank_numeric").head(10)
+    rounded_scores_have_ties = top_10["final_site_score_numeric"].round(2).duplicated(keep=False).any()
+    table_ax.text(
+        0.05,
+        0.94,
+        "Top 10 Ranked Candidates",
+        transform=table_ax.transAxes,
+        fontsize=8.4,
+        fontweight="bold",
+        color="#111827",
+        ha="left",
+        va="top",
+    )
+    table_ax.text(
+        0.05,
+        0.81,
+        "Rank   Candidate     Score",
+        transform=table_ax.transAxes,
+        fontsize=6.6,
+        color="#475569",
+        family="monospace",
+        ha="left",
+        va="top",
+    )
+
+    y = 0.735
+    for _, row in top_10.iterrows():
+        candidate_id = str(row["candidate_id"])
+        score = float(row["final_site_score_numeric"])
+        rank = int(row["candidate_rank_numeric"])
+        table_ax.text(
+            0.05,
+            y,
+            f"{rank:>2}     {candidate_id:<10}  {score:>5.2f}",
+            transform=table_ax.transAxes,
+            fontsize=6.4,
+            color="#111827" if rank <= 5 else "#334155",
+            fontweight="bold" if rank <= 5 else "normal",
+            family="monospace",
+            ha="left",
+            va="top",
+        )
+        y -= 0.057
+
+    table_note = "Proxy scores for portfolio demonstration."
+    if rounded_scores_have_ties:
+        table_note += "\nScores rounded to 2 decimals."
+    table_ax.text(
+        0.05,
+        0.055,
+        table_note,
+        transform=table_ax.transAxes,
+        fontsize=5.8,
+        color="#64748b",
+        ha="left",
+        va="bottom",
+        wrap=True,
+    )
+
+
+def add_methodology_note(note_ax) -> None:
+    """Add a compact scoring-methodology note to the Top 25 side panel."""
+    note_ax.set_facecolor("white")
+    note_ax.set_xticks([])
+    note_ax.set_yticks([])
+    for spine in note_ax.spines.values():
+        spine.set_visible(True)
+        spine.set_edgecolor("#cbd5e1")
+        spine.set_linewidth(0.8)
+
+    note_ax.text(
+        0.05,
+        0.76,
+        "Scoring Methodology",
+        transform=note_ax.transAxes,
+        fontsize=6.5,
+        fontweight="bold",
+        color="#111827",
+        ha="left",
+        va="top",
+    )
+    note_ax.text(
+        0.05,
+        0.47,
+        "Weighted proxy index: location context, footprint,\nclustering, accessibility, and constraints.\nParcel-level validation required.",
+        transform=note_ax.transAxes,
+        fontsize=5.35,
+        color="#475569",
+        ha="left",
+        va="top",
+        linespacing=1.15,
+    )
+
+
+def add_clean_legend(legend_ax) -> None:
+    """Add a compact legend for the Top 25 result map."""
+    legend_ax.set_facecolor("white")
+    legend_ax.set_xticks([])
+    legend_ax.set_yticks([])
+    for spine in legend_ax.spines.values():
+        spine.set_visible(True)
+        spine.set_edgecolor("#cbd5e1")
+        spine.set_linewidth(0.8)
+
+    handles = [
+        Line2D(
+            [0],
+            [0],
+            marker="o",
+            color="none",
+            markerfacecolor="#f97316",
+            markeredgecolor="#7c2d12",
+            markersize=6,
+            label="Top 25 candidate centroid",
+        ),
+        Patch(facecolor="#fed7aa", edgecolor="#c2410c", alpha=0.22, label="Top 25 candidate footprint"),
+        Patch(facecolor="none", edgecolor="#475569", label="Dallas County boundary"),
+    ]
+    legend_ax.legend(
+        handles=handles,
+        loc="center left",
+        bbox_to_anchor=(0.02, 0.5),
+        ncol=1,
+        frameon=False,
+        fontsize=5.9,
+        handlelength=1.6,
+        borderaxespad=0,
+    )
+
+
 def plot_study_area(layers: dict[str, gpd.GeoDataFrame], png_path: Path, pdf_path: Path) -> None:
     """Create DFW study area overview map."""
     fig, ax = plt.subplots(figsize=(12, 9))
@@ -240,6 +722,7 @@ def plot_study_area(layers: dict[str, gpd.GeoDataFrame], png_path: Path, pdf_pat
 def plot_candidate_screening(layers: dict[str, gpd.GeoDataFrame], png_path: Path, pdf_path: Path) -> None:
     """Create Dallas candidate screening and ranked sites map."""
     fig, ax = plt.subplots(figsize=(12, 9))
+    fig.subplots_adjust(right=0.82)
     ax.set_facecolor("#f8fafc")
 
     layers["dfw_zcta_submarkets"].plot(ax=ax, color="#e0f2fe", edgecolor="#93c5fd", linewidth=0.35, alpha=0.45)
@@ -262,147 +745,90 @@ def plot_candidate_screening(layers: dict[str, gpd.GeoDataFrame], png_path: Path
         Patch(facecolor="#fb923c", edgecolor="#9a3412", alpha=0.78, label="Top 25 candidates"),
         Patch(facecolor="none", edgecolor="#111827", label="Dallas County boundary"),
     ]
-    ax.legend(handles=handles, loc="lower right", frameon=True, framealpha=0.94, fontsize=8)
+    ax.legend(
+        handles=handles,
+        loc="lower left",
+        bbox_to_anchor=(1.02, 0.04),
+        frameon=True,
+        framealpha=0.94,
+        fontsize=7.5,
+        borderpad=0.7,
+        labelspacing=0.45,
+    )
     finalize_map(fig, ax, MAP_OUTPUTS["dallas_candidate_screening_map"]["title"], png_path, pdf_path)
 
 
 def plot_top_25(layers: dict[str, gpd.GeoDataFrame], png_path: Path, pdf_path: Path) -> None:
     """Create top 25 candidate close-up map."""
     top_25 = layers["top_25_candidate_sites"].copy()
-    ranked_context = layers["ranked_site_candidates"].copy()
-    submarket_context = layers["dfw_zcta_submarkets"].copy()
+    centroid_points = create_centroid_points_for_labeling(top_25)
+    xmin, xmax, ymin, ymax = calculate_balanced_extent(top_25)
 
-    minx, miny, maxx, maxy = top_25.total_bounds
-    width = max(maxx - minx, 1_000)
-    height = max(maxy - miny, 1_000)
-    pad_x = max(width * 0.12, 1_500)
-    pad_y = max(height * 0.12, 1_500)
-    xmin, xmax = minx - pad_x, maxx + pad_x
-    ymin, ymax = miny - pad_y, maxy + pad_y
+    submarket_context = layers["dfw_zcta_submarkets"].cx[xmin:xmax, ymin:ymax]
+    main_top_25 = top_25.cx[xmin:xmax, ymin:ymax]
+    main_centroids = centroid_points.cx[xmin:xmax, ymin:ymax]
 
-    target_aspect = 12 / 9
-    extent_width = xmax - xmin
-    extent_height = ymax - ymin
-    extent_aspect = extent_width / extent_height
-    center_x = (xmin + xmax) / 2
-    center_y = (ymin + ymax) / 2
-    if extent_aspect > target_aspect:
-        extent_height = extent_width / target_aspect
-        ymin = center_y - extent_height / 2
-        ymax = center_y + extent_height / 2
-    else:
-        extent_width = extent_height * target_aspect
-        xmin = center_x - extent_width / 2
-        xmax = center_x + extent_width / 2
-
-    ranked_context = ranked_context.cx[xmin:xmax, ymin:ymax]
-    submarket_context = submarket_context.cx[xmin:xmax, ymin:ymax]
-
-    fig, ax = plt.subplots(figsize=(12, 9))
+    fig = plt.figure(figsize=(12, 7.2))
+    ax = fig.add_axes([0.04, 0.14, 0.69, 0.755])
+    table_ax = fig.add_axes([0.755, 0.585, 0.225, 0.305])
+    methodology_ax = fig.add_axes([0.755, 0.492, 0.225, 0.07])
+    legend_ax = fig.add_axes([0.755, 0.425, 0.225, 0.048])
+    inset_ax = fig.add_axes([0.755, 0.12, 0.225, 0.285])
     ax.set_facecolor("#f8fafc")
-
-    submarket_context.plot(ax=ax, color="#f1f5f9", edgecolor="#cbd5e1", linewidth=0.35, alpha=0.62)
-    ranked_context.plot(ax=ax, color="#94a3b8", edgecolor="none", alpha=0.16)
-    top_25.plot(
-        ax=ax,
-        color="#f97316",
-        edgecolor="#7c2d12",
-        linewidth=1.55,
-        alpha=0.9,
-        zorder=5,
-    )
-    layers["dallas_county_boundary"].plot(ax=ax, color="none", edgecolor="#334155", linewidth=1.35, zorder=6)
 
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
-
-    label_layer = top_25.sort_values("candidate_rank").head(10)
-    label_offset = min(max(max(extent_width, extent_height) * 0.032, 700), 2_600)
-    label_offsets = [
-        (1.0, 1.0),
-        (1.2, -1.0),
-        (-1.0, 1.1),
-        (-1.2, -1.0),
-        (1.7, 0.2),
-        (-1.7, 0.2),
-        (0.2, 1.7),
-        (0.2, -1.7),
-        (1.55, 1.15),
-        (-1.55, -1.15),
-        (2.1, 0.95),
-        (-2.1, 0.95),
-        (2.1, -0.95),
-        (-2.1, -0.95),
-        (0.95, 2.1),
-        (-0.95, 2.1),
-        (0.95, -2.1),
-        (-0.95, -2.1),
-    ]
-    label_margin_x = extent_width * 0.035
-    label_margin_y = extent_height * 0.04
-    min_label_dx = extent_width * 0.026
-    min_label_dy = extent_height * 0.036
-    placed_labels: list[tuple[float, float]] = []
-
-    for label_index, (_, row) in enumerate(label_layer.iterrows()):
-        point = row.geometry.representative_point()
-        offset_candidates = label_offsets[label_index:] + label_offsets[:label_index]
-        candidate_positions = []
-        for dx_factor, dy_factor in offset_candidates:
-            label_x = min(
-                max(point.x + dx_factor * label_offset, xmin + label_margin_x),
-                xmax - label_margin_x,
-            )
-            label_y = min(
-                max(point.y + dy_factor * label_offset, ymin + label_margin_y),
-                ymax - label_margin_y,
-            )
-            overlap_score = sum(
-                max(0, min_label_dx - abs(label_x - placed_x))
-                + max(0, min_label_dy - abs(label_y - placed_y))
-                for placed_x, placed_y in placed_labels
-            )
-            candidate_positions.append((overlap_score, label_x, label_y))
-            if overlap_score == 0:
-                break
-        _, label_x, label_y = min(candidate_positions, key=lambda item: item[0])
-        placed_labels.append((label_x, label_y))
-        ax.annotate(
-            str(int(row["candidate_rank"])),
-            xy=(point.x, point.y),
-            xytext=(label_x, label_y),
-            fontsize=8,
-            fontweight="bold",
-            color="#111827",
-            ha="center",
-            va="center",
-            bbox={
-                "boxstyle": "round,pad=0.22",
-                "facecolor": "white",
-                "edgecolor": "#cbd5e1",
-                "alpha": 0.96,
-            },
-            arrowprops={"arrowstyle": "-", "color": "#475569", "linewidth": 0.55, "alpha": 0.75},
-            zorder=8,
-        )
-
-    handles = [
-        Patch(facecolor="#f1f5f9", edgecolor="#cbd5e1", alpha=0.62, label="Submarket context"),
-        Patch(facecolor="#94a3b8", edgecolor="none", alpha=0.24, label="Ranked candidate context"),
-        Patch(facecolor="#f97316", edgecolor="#7c2d12", alpha=0.9, label="Top 25 candidates"),
-        Patch(facecolor="white", edgecolor="#cbd5e1", label="Rank labels 1-10"),
-        Patch(facecolor="none", edgecolor="#334155", label="Dallas County boundary"),
-    ]
-    ax.legend(
-        handles=handles,
-        loc="upper center",
-        bbox_to_anchor=(0.5, 0.985),
-        ncol=2,
-        frameon=True,
-        framealpha=0.95,
-        fontsize=8,
+    ax.set_aspect("equal", adjustable="box")
+    main_basemap_used = add_light_basemap(
+        ax,
+        zoom=11,
+        panel_name="main Top 25 map",
+        alpha=0.56,
+        zoom_adjust=0,
     )
-    finalize_map(fig, ax, MAP_OUTPUTS["top_25_candidate_sites_map"]["title"], png_path, pdf_path)
+
+    submarket_context.boundary.plot(ax=ax, color="#cbd5e1", linewidth=0.22, alpha=0.34, zorder=1)
+    main_top_25.plot(
+        ax=ax,
+        color="#fed7aa",
+        edgecolor="#c2410c",
+        linewidth=0.5,
+        alpha=0.2,
+        zorder=5,
+    )
+    main_centroids.plot(
+        ax=ax,
+        color="#f97316",
+        marker="o",
+        markersize=main_centroids["point_size"],
+        edgecolor="#7c2d12",
+        linewidth=0.8,
+        alpha=0.98,
+        zorder=7,
+    )
+    layers["dallas_county_boundary"].plot(
+        ax=ax,
+        color="none",
+        edgecolor="#475569",
+        linewidth=0.7,
+        alpha=0.82,
+        zorder=6,
+    )
+
+    add_top_5_rank_labels(ax, centroid_points, (xmin, xmax, ymin, ymax))
+    add_rank_callout_table(table_ax, centroid_points)
+    add_methodology_note(methodology_ax)
+    add_clean_legend(legend_ax)
+    inset_basemap_used = add_cluster_inset(inset_ax, layers, top_25, centroid_points)
+    print(f"Top 25 basemap used: {'yes' if main_basemap_used or inset_basemap_used else 'no'}")
+
+    add_compact_title_and_note(fig, MAP_OUTPUTS["top_25_candidate_sites_map"]["title"])
+    add_compact_scale_bar(ax, choose_scale_bar_length_km(xmin, xmax))
+    add_compact_north_arrow(ax)
+    ax.set_axis_off()
+    fig.savefig(png_path, dpi=300, bbox_inches="tight", facecolor="white")
+    fig.savefig(pdf_path, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
 
 
 def build_summary(rows: list[dict[str, object]]) -> pd.DataFrame:

@@ -7,6 +7,7 @@ fiona
 folium
 mapclassify
 osmnx
+contextily
 requests
 python-dotenv
 tqdm

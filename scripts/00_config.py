@@ -22,6 +22,7 @@ FINAL_CSV_DIR = FINAL_DATA_DIR / "csv"
 FINAL_GPKG_DIR = FINAL_DATA_DIR / "gpkg"
 PLATFORM_EXPORT_GEOJSON_DIR = FINAL_GEOJSON_DIR / "platform_export"
 CENSUS_RAW_DIR = RAW_DIR / "census_tiger_2025"
+CENSUS_AREAWATER_RAW_DIR = CENSUS_RAW_DIR / "areawater"
 HUD_RAW_DIR = RAW_DIR / "hud_opportunity_zones"
 SCHOOL_DISTRICTS_RAW_DIR = RAW_DIR / "texas_school_districts"
 STUDY_AREA_PROCESSED_DIR = PROCESSED_DIR / "study_area"
@@ -39,6 +40,7 @@ VALIDATION_REPORT_CSV = FINAL_CSV_DIR / "layer_validation_report.csv"
 VALIDATED_LAYERS_GPKG = FINAL_GPKG_DIR / "validated_real_estate_layers.gpkg"
 DFW_OPPORTUNITY_ZONES_GEOJSON = FINAL_GEOJSON_DIR / "dfw_opportunity_zones.geojson"
 DFW_SCHOOL_DISTRICTS_GEOJSON = FINAL_GEOJSON_DIR / "dfw_school_districts.geojson"
+DALLAS_WATERBODIES_GEOJSON = FINAL_GEOJSON_DIR / "dallas_waterbodies.geojson"
 REAL_ESTATE_LAYER_CATALOG_CSV = FINAL_CSV_DIR / "real_estate_layer_catalog.csv"
 REAL_ESTATE_LAYER_CATALOG_GPKG = FINAL_GPKG_DIR / "real_estate_layer_catalog.gpkg"
 PARCEL_SCREENING_CANDIDATES_GEOJSON = FINAL_GEOJSON_DIR / "parcel_screening_candidates.geojson"
@@ -65,6 +67,16 @@ WEBMAP_DIR = OUTPUTS_DIR / "webmap"
 TABLES_DIR = OUTPUTS_DIR / "tables"
 INTERACTIVE_WEBMAP_HTML = WEBMAP_DIR / "texas_real_estate_sourcing_webmap.html"
 WEBMAP_LAYER_SUMMARY_CSV = TABLES_DIR / "webmap_layer_summary.csv"
+TOP25_QUALITY_AUDIT_CSV = TABLES_DIR / "top25_quality_audit.csv"
+SCORING_COMPONENT_VARIANCE_AUDIT_CSV = TABLES_DIR / "scoring_component_variance_audit.csv"
+TOP25_SCORING_AUDIT_CSV = TABLES_DIR / "top25_scoring_audit.csv"
+SCORING_MODEL_MANIFEST_CSV = TABLES_DIR / "scoring_model_manifest.csv"
+TOP25_RANK_STABILITY_AUDIT_CSV = TABLES_DIR / "top25_rank_stability_audit.csv"
+
+DALLAS_AREAWATER_ZIP = CENSUS_AREAWATER_RAW_DIR / "tl_2025_48113_areawater.zip"
+WATER_OVERLAP_RATIO_THRESHOLD = 0.10
+EDGE_FRAGMENT_MIN_AREA_RATIO = 0.60
+WATERBODY_CENTROID_EXCLUSION = True
 
 DOCS_DIR = PROJECT_ROOT / "docs"
 QGIS_DIR = PROJECT_ROOT / "qgis"
@@ -74,6 +86,7 @@ REQUIRED_DIRECTORIES = [
     RAW_DIR,
     PROCESSED_DIR,
     CENSUS_RAW_DIR,
+    CENSUS_AREAWATER_RAW_DIR,
     HUD_RAW_DIR,
     SCHOOL_DISTRICTS_RAW_DIR,
     STUDY_AREA_PROCESSED_DIR,

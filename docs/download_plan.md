@@ -34,6 +34,8 @@ This milestone does not download data, create fake data, create notebooks, or im
 9. Dallas CAD parcel data
 10. OSM amenities / roads
 
+Waterbody exclusion QA uses the minimum additional official source needed for the screening rule: Census TIGER/Line 2025 Dallas County Area Water. It is staged only when the candidate screening workflow runs.
+
 ## What Goes Into `data/raw/`
 
 Store original downloaded source packages and metadata in provider-specific folders, such as:
@@ -110,3 +112,19 @@ The first real-data milestone should then create documented local source folders
 - The catalog workflow now produces `data/final/geojson/dfw_opportunity_zones.geojson`, `data/final/geojson/dfw_school_districts.geojson`, `data/final/csv/real_estate_layer_catalog.csv`, and `data/final/gpkg/real_estate_layer_catalog.gpkg`.
 - Current catalog status includes six available layers: `dallas_county_boundary`, `dfw_cbsa_boundary`, `dfw_zctas`, `dfw_zcta_submarkets`, `dfw_opportunity_zones`, and `dfw_school_districts`.
 - Generated raw and final outputs remain ignored and are not committed to git.
+
+## Waterbody Exclusion QA Staging Notes
+
+- Census TIGER/Line 2025 Dallas County Area Water is used as the official vector waterbody source for candidate screening QA.
+- Raw source ZIP: `data/raw/census_tiger_2025/areawater/tl_2025_48113_areawater.zip`.
+- Generated clipped layer: `data/final/geojson/dallas_waterbodies.geojson`.
+- Candidate screening disqualifies proxy cells whose centroid falls inside a waterbody or whose water overlap ratio is at least `0.10`.
+- Basemap tiles are visual context only and are not used as analysis data.
+- Raw and generated final outputs remain ignored and are not committed.
+
+## Scoring V2 Source Availability Notes
+
+- The v2 scoring model uses existing staged project layers only.
+- Implemented scoring inputs include proxy candidate geometry, Dallas County boundary, Census Area Water, ZCTA submarket proxies, and Opportunity Zone context.
+- TxDOT/OSM road accessibility, FEMA flood constraints, and NCTCOG land-use suitability are not implemented because those source layers are not staged in the current local workflow.
+- Missing professional variables are marked as not implemented and are not replaced with constant default scores.
