@@ -4,6 +4,17 @@
 
 A portfolio-grade Python/QGIS GIS pipeline for real estate sourcing in the Dallas-Fort Worth market, with a Dallas County candidate-screening demonstration. The project turns public GIS layers into validated boundaries, analyst-defined submarkets, candidate-site proxy polygons, ranked sourcing outputs, platform-ready GeoJSON files, static map exports, and an interactive Folium web map.
 
+## Preview Maps
+
+### DFW Study Area Overview
+![DFW Study Area Overview](docs/assets/dfw_study_area_overview.png)
+
+### Dallas Candidate Screening and Ranked Sites
+![Dallas Candidate Screening and Ranked Sites](docs/assets/dallas_candidate_screening_map.png)
+
+### Top 25 Ranked Candidate Sites
+![Top 25 Ranked Candidate Sites](docs/assets/top_25_candidate_sites_map.png)
+
 ## Problem Statement
 
 Real estate sourcing teams need repeatable geospatial workflows that can move from raw public GIS data to defensible screening layers, explainable candidate ranking, and polished deliverables. This project asks:
@@ -36,7 +47,7 @@ The pipeline:
 - Static PNG/PDF portfolio maps
 - Documentation and methodology files
 
-Generated data and map outputs are intentionally ignored by git.
+Generated data and full map outputs are intentionally ignored by git. Selected portfolio preview maps are tracked under `docs/assets/`.
 
 ## Tools Used
 
@@ -71,7 +82,8 @@ scripts/                  Reproducible pipeline scripts
 Create an environment and install dependencies:
 
 ```bash
-cd /Users/berk/Projects/texas-real-estate-gis-pipeline
+git clone https://github.com/hberksafak/texas-real-estate-gis-pipeline.git
+cd texas-real-estate-gis-pipeline
 python3 -m pip install -r requirements.txt
 ```
 
@@ -127,7 +139,7 @@ python3 scripts/10_repository_qa.py
 
 ## Current Status
 
-Frozen v2 scoring QA in progress: reproducibility and rank-stability audit outputs added for the professional proxy screening model.
+Frozen v2 scoring model complete. Reproducibility QA passed: repeated runs return the same Top 25 candidate IDs and scores. Repository QA passed with 39 checks.
 
 ## Limitations
 
