@@ -109,6 +109,12 @@ prints candidate counts plus output folder locations.
 
 Expected local outputs are documented in [Expected outputs](docs/expected_outputs.md).
 
+## Analytical QA
+
+The frozen v2 model, candidate counts, waterbody and edge-fragment checks,
+reproducibility evidence, and limitations are summarized in
+[Analytical QA summary](docs/analytical_qa_summary.md).
+
 ## Milestone Summary
 
 - Milestone 1: project skeleton
@@ -129,6 +135,7 @@ Expected local outputs are documented in [Expected outputs](docs/expected_output
 - [Data sources](docs/data_sources.md)
 - [Download plan](docs/download_plan.md)
 - [Expected outputs](docs/expected_outputs.md)
+- [Analytical QA summary](docs/analytical_qa_summary.md)
 - [Methodology](docs/methodology.md)
 - [Data dictionary](docs/data_dictionary.md)
 - [Portfolio case study](docs/portfolio_case_study.md)

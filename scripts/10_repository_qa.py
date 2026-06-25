@@ -22,6 +22,7 @@ TRACKED_DOCUMENTATION = [
     "requirements.txt",
     ".gitignore",
     "LICENSE",
+    "docs/analytical_qa_summary.md",
     "docs/data_sources.md",
     "docs/download_plan.md",
     "docs/expected_outputs.md",
@@ -383,6 +384,31 @@ def build_checks() -> list[dict[str, object]]:
                 "Required local source files are missing.",
             ],
             notes="Full pipeline runner invokes the source preflight before generating outputs.",
+        )
+    )
+    rows.append(
+        check_text_contains(
+            check_name="analytical_qa::readme_link",
+            relative_path="README.md",
+            required_text=[
+                "Analytical QA summary",
+                "docs/analytical_qa_summary.md",
+            ],
+            notes="README links to the analytical QA summary.",
+        )
+    )
+    rows.append(
+        check_text_contains(
+            check_name="analytical_qa::summary_evidence",
+            relative_path="docs/analytical_qa_summary.md",
+            required_text=[
+                "v2_professional_proxy_screening_limited",
+                "Waterbody QA",
+                "Reproducibility QA",
+                "Analytical Limitations",
+                "Candidate polygons are analyst-defined grid proxies",
+            ],
+            notes="Analytical QA summary documents model version, waterbody QA, reproducibility QA, and limitations.",
         )
     )
     return rows

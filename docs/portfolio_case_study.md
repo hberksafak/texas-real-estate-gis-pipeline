@@ -79,6 +79,12 @@ Opportunity Zones are policy/incentive context only and are not demographic targ
 
 Road accessibility, FEMA flood, and NCTCOG land-use suitability are documented as not implemented because those source layers are not staged in the current local workflow. The model does not give candidates default points for missing data.
 
+## Analytical QA Evidence
+
+The portfolio release freezes the v2 scoring model and packages analytical QA evidence in `docs/analytical_qa_summary.md`. The release QA confirms 2,401 total proxy candidates, 2,161 qualified candidates, 240 disqualified candidates, and 25 Top 25 candidates. Waterbody QA disqualifies 200 candidates, while the Top 25 have zero waterbody overlap and zero centroid-inside-water flags. Edge-fragment QA flags 50 candidates, with zero Top 25 edge-fragment failures.
+
+Reproducibility QA confirms the Top 25 IDs and scores are stable for the frozen v2 model, the Top 10 table matches the ranked CSV, and the Top 25 GeoJSON matches the ranked CSV Top 25. Repository QA passes all current checks. These outputs remain proxy screening evidence, not official parcel acquisition recommendations.
+
 ## Deliverables
 
 Final deliverables include:
