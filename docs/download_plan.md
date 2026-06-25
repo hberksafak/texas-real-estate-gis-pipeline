@@ -113,6 +113,20 @@ The first real-data milestone should then create documented local source folders
 - Current catalog status includes six available layers: `dallas_county_boundary`, `dfw_cbsa_boundary`, `dfw_zctas`, `dfw_zcta_submarkets`, `dfw_opportunity_zones`, and `dfw_school_districts`.
 - Generated raw and final outputs remain ignored and are not committed to git.
 
+## Release Source Preflight Notes
+
+Run `python3 scripts/check_required_sources.py` before the full pipeline runner.
+The check confirms the local manual context files required for exact release
+reproduction:
+
+- HUD Opportunity Zones: `data/raw/hud_opportunity_zones/hud_opportunity_zones_tx.geojson`
+- Texas Unified School Districts: `data/raw/texas_school_districts/tl_2025_48_unsd.zip`
+
+If either file is missing, `scripts/run_full_pipeline.py` stops before generating
+partial outputs and points reviewers back to `docs/data_sources.md` and this
+download plan. These files are not committed because raw GIS source data is
+intentionally ignored.
+
 ## Waterbody Exclusion QA Staging Notes
 
 - Census TIGER/Line 2025 Dallas County Area Water is used as the official vector waterbody source for candidate screening QA.

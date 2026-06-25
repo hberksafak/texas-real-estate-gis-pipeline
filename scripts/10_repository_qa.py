@@ -24,6 +24,7 @@ TRACKED_DOCUMENTATION = [
     "LICENSE",
     "docs/data_sources.md",
     "docs/download_plan.md",
+    "docs/expected_outputs.md",
     "docs/methodology.md",
     "docs/data_dictionary.md",
     "docs/portfolio_case_study.md",
@@ -43,6 +44,8 @@ REQUIRED_SCRIPTS = [
     "scripts/08_create_interactive_webmap.py",
     "scripts/09_create_static_map_exports.py",
     "scripts/10_repository_qa.py",
+    "scripts/check_required_sources.py",
+    "scripts/run_full_pipeline.py",
 ]
 
 KEY_LOCAL_OUTPUTS = [
@@ -50,10 +53,13 @@ KEY_LOCAL_OUTPUTS = [
     "data/final/csv/ranked_site_candidates.csv",
     "data/final/csv/candidate_score_components.csv",
     "data/final/csv/candidate_summary.csv",
+    "data/final/csv/disqualification_audit.csv",
+    "data/final/geojson/top_25_candidate_sites.geojson",
     "data/final/geojson/dallas_waterbodies.geojson",
     "data/final/gpkg/export_ready_layers.gpkg",
     "outputs/webmap/texas_real_estate_sourcing_webmap.html",
     "outputs/tables/top25_quality_audit.csv",
+    "outputs/tables/top25_rank_stability_audit.csv",
     "outputs/tables/scoring_model_manifest.csv",
     "outputs/tables/scoring_component_variance_audit.csv",
     "outputs/tables/top25_scoring_audit.csv",
@@ -61,6 +67,9 @@ KEY_LOCAL_OUTPUTS = [
     "outputs/maps/png/dfw_study_area_overview.png",
     "outputs/maps/png/dallas_candidate_screening_map.png",
     "outputs/maps/png/top_25_candidate_sites_map.png",
+    "outputs/maps/pdf/dfw_study_area_overview.pdf",
+    "outputs/maps/pdf/dallas_candidate_screening_map.pdf",
+    "outputs/maps/pdf/top_25_candidate_sites_map.pdf",
 ]
 
 
@@ -98,6 +107,36 @@ def check_path(check_name: str, relative_path: str, notes: str) -> dict[str, obj
         "exists": exists,
         "status": "passed" if exists else "failed",
         "notes": notes,
+    }
+
+
+def check_text_contains(
+    check_name: str,
+    relative_path: str,
+    required_text: list[str],
+    notes: str,
+) -> dict[str, object]:
+    """Return one QA check row confirming required release guidance is present."""
+    path = PROJECT_ROOT / relative_path
+    if not path.exists():
+        return {
+            "check_name": check_name,
+            "path": str(path),
+            "exists": False,
+            "status": "failed",
+            "notes": f"File is missing. {notes}",
+        }
+
+    text = path.read_text(encoding="utf-8")
+    missing = [snippet for snippet in required_text if snippet not in text]
+    status = "passed" if not missing else "failed"
+    missing_note = "" if not missing else " Missing text: " + "; ".join(missing)
+    return {
+        "check_name": check_name,
+        "path": str(path),
+        "exists": True,
+        "status": status,
+        "notes": notes + missing_note,
     }
 
 
@@ -310,6 +349,42 @@ def build_checks() -> list[dict[str, object]]:
         )
     rows.append(check_waterbody_summary())
     rows.append(check_top_25_waterbody_exclusion())
+    rows.append(
+        check_text_contains(
+            check_name="release_guidance::readme_source_preflight",
+            relative_path="README.md",
+            required_text=[
+                "python3 scripts/check_required_sources.py",
+                "source preflight",
+                "Raw source files are intentionally not",
+                "committed to git",
+            ],
+            notes="README documents source preflight and raw-data staging expectations.",
+        )
+    )
+    rows.append(
+        check_text_contains(
+            check_name="release_guidance::docs_manual_source_staging",
+            relative_path="docs/download_plan.md",
+            required_text=[
+                "Release Source Preflight Notes",
+                "data/raw/hud_opportunity_zones/hud_opportunity_zones_tx.geojson",
+                "data/raw/texas_school_districts/tl_2025_48_unsd.zip",
+            ],
+            notes="Download plan documents exact manual context source staging paths.",
+        )
+    )
+    rows.append(
+        check_text_contains(
+            check_name="release_guidance::runner_calls_source_preflight",
+            relative_path="scripts/run_full_pipeline.py",
+            required_text=[
+                "scripts/check_required_sources.py",
+                "Required local source files are missing.",
+            ],
+            notes="Full pipeline runner invokes the source preflight before generating outputs.",
+        )
+    )
     return rows
 
 
@@ -337,6 +412,8 @@ def main() -> None:
     print(f"Passed checks: {passed_checks}")
     print(f"Failed checks: {failed_checks}")
     print(f"QA report path: {QA_REPORT_PATH}")
+    if failed_checks:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
